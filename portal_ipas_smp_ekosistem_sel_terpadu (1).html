@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Learning Laboratory - Portal Biologi SMA Kelas 11</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' },
+                        accent: { 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
+                        game: { 500: '#f59e0b', 600: '#d97706' }
+                    },
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'bounce-slight': 'bounce 2s infinite',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, filter: 'drop-shadow(0 0 10px rgba(99,102,241,0.8))' },
+                            '50%': { opacity: .5, filter: 'drop-shadow(0 0 2px rgba(99,102,241,0.2))' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0, transform: 'translateY(10px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        ::-webkit-scrollbar { width: 8px; } 
+        ::-webkit-scrollbar-track { background: transparent; } 
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; } 
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        body { font-family: 'Nunito', sans-serif; }
+        
+        /* Modern Glass/Soft UI styling */
+        .box-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
+        .dark .box-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .box-card:hover { transform: translateY(-3px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        .box-btn { border-radius: 9999px; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .box-btn::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); transform: translateX(-100%); transition: transform 0.5s ease; }
+        .box-btn:hover::after { transform: translateX(100%); }
+        .box-btn:hover { transform: translateY(-2px) scale(1.02); shadow-lg }
+        
+        .app-layout { display: flex; min-height: 100vh; }
+        .main-sidebar { width: 280px; flex-shrink: 0; transition: transform 0.3s ease; z-index: 50; }
+        .content-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+        
+        @media (max-width: 1024px) {
+            .main-sidebar { position: fixed; transform: translateX(-100%); height: 100vh; overflow-y: auto; }
+            .main-sidebar.open { transform: translateX(0); }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+            .sidebar-overlay.open { display: block; }
+        }
+
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.25rem; border-radius: 1rem; color: #64748b; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; transition: all 0.2s; cursor: pointer; border: 2px solid transparent; }
+        .dark .nav-item { color: #94a3b8; }
+        .nav-item:hover { background: #f1f5f9; color: #4f46e5; }
+        .dark .nav-item:hover { background: #334155; color: #818cf8; }
+        .nav-item.active { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+        .dark .nav-item.active { background: #312e81; color: #c7d2fe; border-color: #4f46e5; }
+        .nav-item i { width: 1.5rem; text-align: center; margin-right: 0.75rem; font-size: 1.1rem; }
+
+        .organelle-drag { cursor: grab; } .organelle-drag:active { cursor: grabbing; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 1rem; transition: all 0.2s; pointer-events: auto;}
+        .drop-zone.active { border-color: #10b981; background: #ecfdf5; }
+        .drop-zone > * { pointer-events: none; }
+        
+        .tab-btn.active { border-bottom-color: #4f46e5; color: #4f46e5; }
+        .dark .tab-btn.active { border-bottom-color: #818cf8; color: #818cf8; }
+        
+        @media print {
+            body > *:not(#lab-report-modal) { display: none !important; }
+            #lab-report-modal { display: block !important; position: static !important; background: white !important; }
+            #lab-report-modal > div { max-width: 100% !important; box-shadow: none !important; border-radius: 0 !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300 selection:bg-brand-500 selection:text-white">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-950 dark:to-black">
+        <div class="box-card w-full max-w-md p-8 text-center space-y-6 relative overflow-hidden bg-white/80 dark:bg-slate-900/80">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-brand-400 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-pulse"></div>
+            
+            <div class="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-500 text-white flex items-center justify-center text-4xl mx-auto shadow-xl shadow-brand-500/40 z-10 border-4 border-white dark:border-slate-800 transform rotate-3">
+                <i class="fa-solid fa-microscope"></i>
+            </div>
+            
+            <div class="relative z-10">
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-tight">Cell Learning<br><span class="text-brand-600 dark:text-accent-400">Laboratory</span></h1>
+                <p class="text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">Ekosistem Belajar Terpadu Biologi XI</p>
+            </div>
+            
+            <!-- Role Tabs -->
+            <div class="flex border-b border-slate-200 dark:border-slate-700 relative z-10">
+                <button onclick="switchLoginTab('student')" id="tab-login-student" class="flex-1 py-2 text-sm font-black uppercase text-brand-600 border-b-2 border-brand-600">👩‍🔬 Siswa</button>
+                <button onclick="switchLoginTab('teacher')" id="tab-login-teacher" class="flex-1 py-2 text-sm font-black uppercase text-slate-400 border-b-2 border-transparent hover:text-slate-600">👨‍🏫 Guru</button>
+            </div>
+
+            <!-- Student Login Form -->
+            <div id="form-student" class="space-y-4 text-left relative z-10 animate-fade-in">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nama Lengkap</label>
+                    <input type="text" id="welcome-name" placeholder="John Doe" class="w-full p-3 bg-white dark:bg-slate-900 text-sm font-bold uppercase focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl transition-all border-2 border-slate-200 dark:border-slate-700 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Kelas</label>
+                        <select id="welcome-kelas" class="w-full p-3 bg-white dark:bg-slate-900 text-sm font-bold uppercase focus:border-brand-500 rounded-xl border-2 border-slate-200 dark:border-slate-700 outline-none">
+                            <option value="">Pilih...</option> <option value="11A">11A</option> <option value="11B">11B</option> <option value="11C">11C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">No Absen</label>
+                        <input type="number" id="welcome-absen" placeholder="01" class="w-full p-3 bg-white dark:bg-slate-900 text-sm font-bold uppercase focus:border-brand-500 rounded-xl border-2 border-slate-200 dark:border-slate-700 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">PIN Siswa</label>
+                    <input type="password" id="welcome-student-pin" placeholder="••••••••" class="w-full p-3 bg-white dark:bg-slate-900 text-sm font-bold uppercase focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl transition-all border-2 border-slate-200 dark:border-slate-700 outline-none">
+                    <p class="text-[9px] text-slate-400 mt-1 italic">*Gunakan PIN: siswa123</p>
+                </div>
+                <button onclick="startApp('student')" class="box-btn w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/30 mt-2">
+                    Masuk Laboratorium <i class="fa-solid fa-right-to-bracket ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Teacher Login Form -->
+            <div id="form-teacher" class="space-y-4 text-left relative z-10 hidden animate-fade-in">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">PIN Akses Guru</label>
+                    <input type="password" id="welcome-pin" placeholder="••••••••" class="w-full p-3 bg-white dark:bg-slate-900 text-sm font-bold uppercase focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl transition-all border-2 border-slate-200 dark:border-slate-700 outline-none">
+                    <p class="text-[9px] text-slate-400 mt-1 italic">*Gunakan PIN: guru123</p>
+                </div>
+                <button onclick="startApp('teacher')" class="box-btn w-full py-4 bg-gradient-to-r from-accent-600 to-accent-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-accent-500/30 mt-2">
+                    Buka Dashboard <i class="fa-solid fa-chalkboard-user ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LAB REPORT MODAL (NEW) -->
+    <div id="lab-report-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+        <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[95vh] overflow-y-auto shadow-2xl flex flex-col relative">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center no-print bg-gradient-to-r from-brand-700 to-indigo-800 text-white rounded-t-2xl sticky top-0 z-10 shadow-md">
+                <h2 class="text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-file-signature mr-2"></i> Digital Lab Report</h2>
+                <div class="flex gap-2">
+                    <button onclick="printLabReport()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-black uppercase transition shadow-sm"><i class="fa-solid fa-print mr-1"></i> Cetak PDF</button>
+                    <button onclick="closeLabReport()" class="px-4 py-2 bg-rose-500 hover:bg-rose-400 rounded-lg text-xs font-black uppercase transition shadow-sm"><i class="fa-solid fa-xmark"></i> Tutup</button>
+                </div>
+            </div>
+            
+            <div class="p-10 text-slate-800 bg-white" id="printable-report">
+                <!-- Kop Laporan -->
+                <div class="text-center border-b-4 border-slate-900 pb-6 mb-8 relative">
+                    <i class="fa-solid fa-microscope absolute left-0 top-2 text-5xl text-slate-200"></i>
+                    <h1 class="text-4xl font-black uppercase tracking-widest text-slate-900 leading-tight">Laporan Praktikum</h1>
+                    <p class="text-sm font-black text-slate-500 uppercase mt-2 tracking-widest">Cell Learning Laboratory V2</p>
+                </div>
+                
+                <!-- Identitas -->
+                <div class="grid grid-cols-2 gap-6 mb-10 text-sm">
+                    <div>
+                        <p class="text-slate-400 font-black uppercase text-[10px] tracking-wider mb-1">Nama Peneliti (Siswa)</p>
+                        <p class="font-black text-xl border-b-2 border-slate-200 pb-1 text-brand-700 uppercase" id="lr-name">-</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-slate-400 font-black uppercase text-[10px] tracking-wider mb-1">Kelas</p>
+                            <p class="font-black text-xl border-b-2 border-slate-200 pb-1 uppercase text-slate-700" id="lr-kelas">-</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 font-black uppercase text-[10px] tracking-wider mb-1">No. Absen</p>
+                            <p class="font-black text-xl border-b-2 border-slate-200 pb-1 text-slate-700" id="lr-absen">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hasil Observasi -->
+                <div class="space-y-8">
+                    <div class="bg-slate-50 p-6 border-2 border-slate-200 rounded-2xl">
+                        <h3 class="font-black uppercase text-slate-800 mb-4 border-b-2 border-slate-200 pb-2 text-lg"><i class="fa-solid fa-chart-pie mr-2 text-brand-500"></i> Data Eksperimen</h3>
+                        <div class="grid grid-cols-2 gap-y-6 text-sm">
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px]">Topik Simulasi</p>
+                                <p class="font-black text-slate-700">Pengamatan Mikroskopis Sel</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px]">Tanggal Eksekusi</p>
+                                <p class="font-black text-slate-700" id="lr-date">-</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px]">Akurasi Prosedur</p>
+                                <p class="text-emerald-600 font-black text-3xl mt-1" id="lr-acc">0%</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px]">Status Evaluasi</p>
+                                <span class="inline-block mt-1 text-emerald-700 bg-emerald-100 font-black px-3 py-1.5 rounded-lg border border-emerald-300 uppercase text-xs"><i class="fa-solid fa-check-circle mr-1"></i> Tervalidasi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-black uppercase text-slate-800 mb-3 text-lg"><i class="fa-solid fa-robot mr-2 text-brand-500"></i> Hasil Analisis Sistem Otomatis</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed font-bold bg-white border border-slate-200 p-5 rounded-xl text-justify">
+                            Berdasarkan log rekam jejak simulasi pada Virtual Laboratory, praktikan telah berhasil menjalankan protokol pengamatan preparat. Praktikan mampu menggunakan instrumen mikroskop virtual—meliputi penyesuaian makrometer dan mikrometer, pengaturan intensitas cahaya (kondensor), serta pemilihan lensa objektif yang presisi—sehingga preparat <strong>Epitel Bawang (Sel Tumbuhan)</strong> dan <strong>Epitel Pipi (Sel Hewan)</strong> dapat diobservasi dengan fokus visual yang optimal.
+                        </p>
+                    </div>
+                    
+                    <div class="pt-12 flex justify-end">
+                        <div class="text-center w-48">
+                            <p class="text-[10px] font-black uppercase text-slate-400 mb-16 tracking-widest">Disahkan secara otomatis oleh,</p>
+                            <p class="text-sm font-black border-t-2 border-slate-800 pt-2 uppercase text-slate-900">AI Lab Validator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEACHER DASHBOARD WRAPPER -->
+    <div id="teacher-wrapper" class="hidden min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+        <!-- Teacher Header -->
+        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-teal-500 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-user-tie text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none block">Dashboard Guru</span>
+                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">Control Panel</span>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="downloadCSV()" class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-black uppercase hover:bg-emerald-200 transition"><i class="fa-solid fa-download mr-1"></i> Rekap Nilai</button>
+                    <button onclick="logout()" class="px-4 py-2 bg-rose-100 text-rose-700 rounded-lg text-xs font-black uppercase hover:bg-rose-200 transition"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Sidebar Guru -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="box-card p-4">
+                    <button onclick="switchTeacherTab('students')" id="t-tab-students" class="w-full text-left p-3 rounded-xl font-bold text-sm bg-accent-50 text-accent-700 dark:bg-accent-900/30 mb-2 transition"><i class="fa-solid fa-users mr-2"></i> Data & Nilai Siswa</button>
+                    <button onclick="switchTeacherTab('lkpd')" id="t-tab-lkpd" class="w-full text-left p-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-file-pen mr-2"></i> Kelola Soal LKPD</button>
+                </div>
+                
+                <div class="box-card p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white border-none">
+                    <h3 class="font-black uppercase text-xs text-slate-400 mb-4">Statistik Kelas</h3>
+                    <div class="space-y-4">
+                        <div><p class="text-[10px] text-slate-400 uppercase">Total Siswa Login</p><p class="text-2xl font-black text-accent-400" id="stat-total-students">0</p></div>
+                        <div><p class="text-[10px] text-slate-400 uppercase">Rata-rata Nilai Kuis</p><p class="text-2xl font-black text-brand-400" id="stat-avg-quiz">0</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Guru -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Tab: Students -->
+                <div id="t-content-students" class="box-card p-6 animate-fade-in">
+                    <h2 class="text-xl font-black uppercase border-b-2 border-slate-200 dark:border-slate-700 pb-3 mb-4">Data & Aktivitas Siswa</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] uppercase font-black tracking-wider">
+                                    <th class="p-3 rounded-tl-lg">Nama Lengkap</th>
+                                    <th class="p-3">Kelas</th>
+                                    <th class="p-3">Level / XP</th>
+                                    <th class="p-3">Nilai Kuis</th>
+                                    <th class="p-3 rounded-tr-lg">Status LKPD</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-students-list" class="text-sm divide-y divide-slate-100 dark:divide-slate-800">
+                                <!-- Data diisi via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab: LKPD -->
+                <div id="t-content-lkpd" class="box-card p-6 hidden animate-fade-in">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 dark:border-slate-700 pb-3 mb-4">
+                        <h2 class="text-xl font-black uppercase">Kelola Soal LKPD</h2>
+                        <span class="text-xs font-bold bg-accent-100 text-accent-700 px-2 py-1 rounded">Otomatis sinkron ke siswa</span>
+                    </div>
+                    
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-6 space-y-3">
+                        <h3 class="text-xs font-black uppercase text-slate-500">Tambah Pertanyaan Baru</h3>
+                        <input type="text" id="new-lkpd-q" placeholder="Contoh: Apa fungsi utama mitokondria?" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm outline-none focus:border-accent-500 dark:bg-slate-800">
+                        <button onclick="addLKPDQuestion()" class="box-btn px-4 py-2 bg-accent-600 text-white font-bold text-xs uppercase rounded-lg shadow-md hover:bg-accent-500"><i class="fa-solid fa-plus mr-1"></i> Tambah Soal</button>
+                    </div>
+
+                    <div id="teacher-lkpd-list" class="space-y-3">
+                        <!-- Soal diisi via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT APP WRAPPER -->
+    <div id="app-wrapper" class="hidden app-layout bg-slate-50/50 dark:bg-slate-950/50">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+        <aside class="main-sidebar bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen sticky top-0" id="main-sidebar">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchMainTab('home')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-microscope text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none block">Cell Lab</span>
+                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">Ecosystem V2</span>
+                    </div>
+                </div>
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Profile Summary -->
+            <div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 m-4 rounded-2xl cursor-pointer hover:bg-slate-100 transition" onclick="switchMainTab('progress')">
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Scientist&backgroundColor=c0aede" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-brand-100">
+                        <div class="absolute -bottom-1 -right-1 bg-amber-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">L<span id="sb-level">1</span></div>
+                    </div>
+                    <div class="overflow-hidden flex-grow">
+                        <h4 id="sb-name" class="font-black text-sm uppercase truncate">Student</h4>
+                        <p class="text-[9px] font-bold text-slate-500 truncate"><span id="sb-kelas"></span> | Absen: <span id="sb-absen"></span></p>
+                    </div>
+                </div>
+                <div class="mt-3 w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div id="sb-xp-bar" class="bg-gradient-to-r from-brand-500 to-accent-500 h-full w-0 transition-all duration-500"></div>
+                </div>
+                <p class="text-[9px] text-slate-400 font-bold text-right mt-1"><span id="sb-xp">0</span> / <span id="sb-next-xp">100</span> XP</p>
+            </div>
+
+            <nav class="flex-grow overflow-y-auto p-4 space-y-1" id="nav-menu">
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-2 px-2">Core Foundation</div>
+                <div class="nav-item active" data-target="home" onclick="switchMainTab('home')"><i class="fa-solid fa-house"></i> Home</div>
+                <div class="nav-item" data-target="kompetensi" onclick="switchMainTab('kompetensi')"><i class="fa-solid fa-bullseye"></i> Kompetensi</div>
+                <div class="nav-item" data-target="learn" onclick="switchMainTab('learn')"><i class="fa-solid fa-book-open"></i> Learn (Materi)</div>
+                <div class="nav-item" data-target="explore" onclick="switchMainTab('explore')"><i class="fa-solid fa-cube"></i> Explore (Peta Sel)</div>
+                <div class="nav-item" data-target="profil" onclick="switchMainTab('profil')"><i class="fa-solid fa-users"></i> Profil Penyusun</div>
+                
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-6 px-2">Action & Labs</div>
+                <div class="nav-item" data-target="lab" onclick="switchMainTab('lab')"><i class="fa-solid fa-microscope"></i> Virtual Lab</div>
+                <div class="nav-item" data-target="investigate" onclick="switchMainTab('investigate')"><i class="fa-solid fa-user-doctor"></i> Cell Hospital</div>
+                <div class="nav-item" data-target="think" onclick="switchMainTab('think')"><i class="fa-solid fa-lightbulb"></i> Think (What If)</div>
+                <div class="nav-item" data-target="game" onclick="switchMainTab('game')"><i class="fa-solid fa-puzzle-piece"></i> Build a Cell</div>
+                
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-6 px-2">Evaluation</div>
+                <div class="nav-item" data-target="journal" onclick="switchMainTab('journal')"><i class="fa-solid fa-book-journal-whills"></i> Lab Journal (LKPD)</div>
+                <div class="nav-item" data-target="assessment" onclick="switchMainTab('assessment')"><i class="fa-solid fa-list-check"></i> Assessment (Kuis)</div>
+                <div class="nav-item" data-target="progress" onclick="switchMainTab('progress')"><i class="fa-solid fa-chart-line"></i> My Progress</div>
+                
+                <div class="mt-6 px-4">
+                    <button onclick="logout()" class="w-full py-2 bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 rounded-lg text-xs font-black uppercase hover:bg-rose-100 transition"><i class="fa-solid fa-power-off mr-1"></i> Ganti Akun</button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <main class="content-area flex flex-col h-screen overflow-hidden relative">
+            <header class="lg:hidden bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center z-30 sticky top-0">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fa-solid fa-microscope text-sm"></i></div>
+                    <span class="font-black uppercase tracking-tight">Cell Lab</span>
+                </div>
+                <button onclick="toggleMobileMenu()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600"><i class="fa-solid fa-bars"></i></button>
+            </header>
+
+            <div class="flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8" id="main-content-scroll">
+                
+                <!-- TAB: HOME -->
+                <section id="tab-home" class="main-tab space-y-8 animate-fade-in">
+                    <div class="relative bg-gradient-to-br from-brand-600 via-indigo-600 to-accent-600 text-white p-8 sm:p-12 rounded-[2rem] shadow-xl overflow-hidden">
+                        <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4"><i class="fa-solid fa-dna text-[20rem]"></i></div>
+                        <div class="relative z-10 max-w-3xl space-y-6">
+                            <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-none uppercase">Halo, <br><span class="text-accent-300" id="home-name">Ilmuwan</span>!</h1>
+                            <p class="text-brand-100 text-sm font-bold border-l-4 border-accent-400 pl-4 max-w-xl leading-relaxed">Ekosistem ini merangkum seluruh perjalanan pengamatan mikroskopis. Pelajari teori, lakukan simulasi laboratorium, diagnosis kerusakan sel, hingga kerjakan evaluasi.</p>
+                            <div class="flex gap-4 pt-4">
+                                <button onclick="switchMainTab('learn')" class="box-btn px-6 py-3 bg-white text-brand-800 font-black uppercase text-xs rounded-xl shadow-lg">Mulai Belajar <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="box-card p-6 border-t-4 border-emerald-500 cursor-pointer hover:bg-emerald-50" onclick="switchMainTab('lab')">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-3"><i class="fa-solid fa-microscope"></i></div>
+                            <h3 class="font-black uppercase text-sm mb-1">Virtual Lab</h3><p class="text-[10px] font-bold text-slate-500 leading-tight">Gunakan mikroskop virtual untuk mengamati preparat asli.</p>
+                        </div>
+                        <div class="box-card p-6 border-t-4 border-rose-500 cursor-pointer hover:bg-rose-50" onclick="switchMainTab('investigate')">
+                            <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center mb-3"><i class="fa-solid fa-user-doctor"></i></div>
+                            <h3 class="font-black uppercase text-sm mb-1">Cell Hospital</h3><p class="text-[10px] font-bold text-slate-500 leading-tight">Analisis gejala dan perbaiki organel sel yang rusak.</p>
+                        </div>
+                        <div class="box-card p-6 border-t-4 border-amber-500 cursor-pointer hover:bg-amber-50" onclick="switchMainTab('journal')">
+                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mb-3"><i class="fa-solid fa-book-journal-whills"></i></div>
+                            <h3 class="font-black uppercase text-sm mb-1">Lab Journal</h3><p class="text-[10px] font-bold text-slate-500 leading-tight">Catat hasil praktikum dan jawab soal LKPD dari gurumu.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: KOMPETENSI (BARU) -->
+                <section id="tab-kompetensi" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Kompetensi Dasar</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Kurikulum Merdeka - Biologi Fase F (Kelas XI)</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="box-card p-6 border-t-8 border-brand-500">
+                            <h3 class="font-black text-lg uppercase mb-3 flex items-center text-brand-700"><i class="fa-solid fa-bullseye mr-2"></i> Capaian Pembelajaran (CP)</h3>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 font-bold leading-relaxed text-justify">Pada akhir fase F, peserta didik memiliki kemampuan mendeskripsikan struktur sel serta bioproses yang terjadi seperti transpor membran dan pembelahan sel; menganalisis keterkaitan struktur organ pada sistem organ dengan fungsinya serta kelainan atau gangguan yang muncul pada sistem organ tersebut.</p>
+                        </div>
+                        <div class="box-card p-6 border-t-8 border-accent-500">
+                            <h3 class="font-black text-lg uppercase mb-3 flex items-center text-accent-700"><i class="fa-solid fa-route mr-2"></i> Alur Tujuan Pembelajaran (ATP)</h3>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 font-bold leading-relaxed text-justify">Peserta didik mengkaji konsep sel sebagai unit dasar kehidupan, menganalisis komponen kimiawi penyusun sel, membedakan sel prokariotik dan eukariotik, serta memodelkan mekanisme transpor zat melintasi membran sel (osmosis, difusi, transpor aktif).</p>
+                        </div>
+                    </div>
+                    <div class="box-card p-6 border-t-8 border-amber-500">
+                        <h3 class="font-black text-lg uppercase mb-4 flex items-center text-amber-700"><i class="fa-solid fa-list-check mr-2"></i> Tujuan Pembelajaran</h3>
+                        <ul class="space-y-3 font-bold text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex"><i class="fa-solid fa-check text-emerald-500 mr-3 mt-1"></i> Menjelaskan komponen kimiawi penyusun sel (karbohidrat, lipid, protein, dan asam nukleat).</li>
+                            <li class="flex"><i class="fa-solid fa-check text-emerald-500 mr-3 mt-1"></i> Menganalisis perbedaan struktur sel hewan dan sel tumbuhan serta organel penyusunnya.</li>
+                            <li class="flex"><i class="fa-solid fa-check text-emerald-500 mr-3 mt-1"></i> Mengaitkan struktur organel dengan fungsinya dalam proses metabolisme sel.</li>
+                            <li class="flex"><i class="fa-solid fa-check text-emerald-500 mr-3 mt-1"></i> Menganalisis mekanisme bioproses sel, meliputi difusi, osmosis, transpor aktif, endositosis, dan eksositosis.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- TAB: PROFIL PENYUSUN (BARU) -->
+                <section id="tab-profil" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-indigo-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Profil Penyusun</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Tim Edukasi Pengembangan Ekosistem Laboratorium</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Profile Cards -->
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Lukma Arohman Arohman</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100115</p></div>
+                        </div>
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Asyrifatun Najiya</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100123</p></div>
+                        </div>
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Septi Lailatul R</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100116</p></div>
+                        </div>
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Lukma Arohman</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100116</p></div>
+                        </div>
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Adindah Dhea</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100144</p></div>
+                        </div>
+                        <div class="box-card p-6 flex items-center space-x-4 border-l-4 border-indigo-500 hover:-translate-y-1 transition duration-300 dark:bg-slate-800">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-black shadow-inner flex-shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="overflow-hidden"><h3 class="font-black text-[13px] uppercase text-slate-800 dark:text-white truncate">Shabrina Fildzah G</h3><p class="text-[10px] font-black tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mt-1">NIM: 240641100122</p></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: LEARN -->
+                <section id="tab-learn" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Theory & Learn</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Eksplorasi Materi Multidimensi</p>
+                    </div>
+                    
+                    <!-- Sub-Navigation Learn -->
+                    <div class="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto custom-scrollbar">
+                        <button id="btn-sub-learn-materi" onclick="activateSubTab('learn', 'materi')" class="btn-sub-learn px-4 py-2 rounded-xl font-black text-xs uppercase bg-brand-500 text-white whitespace-nowrap shadow-md transition">📚 Materi Inti</button>
+                        <button id="btn-sub-learn-video" onclick="activateSubTab('learn', 'video')" class="btn-sub-learn px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🎥 Video Embed</button>
+                        <button id="btn-sub-learn-animasi" onclick="activateSubTab('learn', 'animasi')" class="btn-sub-learn px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🪄 Animasi 3D</button>
+                        <button id="btn-sub-learn-infografis" onclick="activateSubTab('learn', 'infografis')" class="btn-sub-learn px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">📊 Infografis</button>
+                    </div>
+
+                    <div id="sub-learn-materi" class="sub-learn space-y-6 animate-fade-in">
+                        <!-- BAGIAN 1: TEORI & KOMPONEN -->
+                        <div class="box-card p-8 border-t-4 border-brand-500 bg-white dark:bg-slate-900">
+                            <h2 class="text-2xl font-black uppercase mb-4 text-brand-700 dark:text-brand-400"><i class="fa-solid fa-microscope mr-2"></i> Konsep Dasar & Komponen Sel</h2>
+                            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">Sel merupakan unit struktural dan fungsional terkecil penyusun makhluk hidup. Menurut teori sel modern, semua makhluk hidup tersusun atas satu atau banyak sel, dan semua sel berasal dari sel yang sudah ada sebelumnya (<i>omnis cellula e cellula</i>).</p>
+                            
+                            <h3 class="text-sm font-black uppercase text-slate-800 dark:text-white mb-3 border-l-4 border-accent-500 pl-3">Komponen Kimiawi Sel</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold text-slate-600 dark:text-slate-300">
+                                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <h4 class="font-black text-brand-600 mb-2">1. Komponen Organik</h4>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li><strong>Karbohidrat:</strong> Sumber energi utama & penyusun struktur (selulosa).</li>
+                                        <li><strong>Lipid (Lemak):</strong> Komponen utama membran plasma (Fosfolipid bilayer) & penyimpan energi.</li>
+                                        <li><strong>Protein:</strong> Enzim pengatur reaksi, protein transpor, dan antibodi.</li>
+                                        <li><strong>Asam Nukleat:</strong> DNA (materi genetik) dan RNA (pelaksana sintesis protein).</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <h4 class="font-black text-accent-600 mb-2">2. Komponen Anorganik</h4>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li><strong>Air (H₂O):</strong> Pelarut utama penyusun sitoplasma (hingga 70-85% massa sel).</li>
+                                        <li><strong>Garam Mineral:</strong> Kalsium (Ca), Fosfor (P), Natrium (Na) pengatur fungsi osmosis.</li>
+                                        <li><strong>Gas:</strong> Oksigen (O₂) untuk respirasi dan Karbon Dioksida (CO₂).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BAGIAN 2: ORGANEL SEL -->
+                        <div class="box-card p-8 border-t-4 border-emerald-500 bg-white dark:bg-slate-900">
+                            <h2 class="text-2xl font-black uppercase mb-4 text-emerald-700 dark:text-emerald-400"><i class="fa-solid fa-cube mr-2"></i> Struktur & Organel Sel Eukariotik</h2>
+                            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">Sel eukariotik (seperti sel hewan dan tumbuhan) memiliki sistem endomembran dan inti sel sejati yang dibungkus oleh membran nukleus.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                    <h4 class="font-black text-emerald-800 dark:text-emerald-300 mb-1 flex items-center"><i class="fa-solid fa-dna mr-2"></i> Inti Sel (Nukleus)</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Pusat kendali sel. Menyimpan kromosom (DNA) dan mengoordinasikan pembelahan sel serta sintesis protein (melalui RNA).</p>
+                                </div>
+                                <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                                    <h4 class="font-black text-amber-800 dark:text-amber-300 mb-1 flex items-center"><i class="fa-solid fa-bolt mr-2"></i> Mitokondria</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Organel bermembran ganda pembentuk energi. Tempat terjadinya respirasi seluler yang menghasilkan ATP (Adenosin Trifosfat).</p>
+                                </div>
+                                <div class="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl">
+                                    <h4 class="font-black text-rose-800 dark:text-rose-300 mb-1 flex items-center"><i class="fa-solid fa-circle-dot mr-2"></i> Ribosom</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Partikel kecil tanpa membran penyusun rRNA. Berperan krusial sebagai tempat berlangsungnya sintesis (pembuatan) protein.</p>
+                                </div>
+                                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                    <h4 class="font-black text-blue-800 dark:text-blue-300 mb-1 flex items-center"><i class="fa-solid fa-network-wired mr-2"></i> Retikulum Endoplasma</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Terbagi dua: RE Kasar (ditempeli ribosom untuk transpor protein) dan RE Halus (tempat sintesis lipid dan detoksifikasi racun).</p>
+                                </div>
+                                <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                                    <h4 class="font-black text-purple-800 dark:text-purple-300 mb-1 flex items-center"><i class="fa-solid fa-layer-group mr-2"></i> Badan Golgi</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Berbentuk kantong pipih. Bertugas memodifikasi, menyortir, dan mengemas makromolekul (protein/lipid) untuk disekresikan.</p>
+                                </div>
+                                <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                                    <h4 class="font-black text-red-800 dark:text-red-300 mb-1 flex items-center"><i class="fa-solid fa-trash-can mr-2"></i> Lisosom & Sentriol</h4>
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Hanya pada sel hewan. <b>Lisosom:</b> Pencernaan intraseluler (autofagi). <b>Sentriol:</b> Mengatur benang spindel saat pembelahan sel.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BAGIAN 3: TRANSPOR MEMBRAN -->
+                        <div class="box-card p-8 border-t-4 border-blue-500 bg-white dark:bg-slate-900">
+                            <h2 class="text-2xl font-black uppercase mb-4 text-blue-700 dark:text-blue-400"><i class="fa-solid fa-arrow-right-arrow-left mr-2"></i> Transpor Membran</h2>
+                            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">Membran plasma bersifat semi-permeabel, mengatur lalu lintas molekul. Prosesnya terbagi menjadi dua kelompok besar:</p>
+                            
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-blue-400 pl-4 py-2">
+                                    <h3 class="text-base font-black text-slate-800 dark:text-white uppercase mb-1">A. Transpor Pasif (Tanpa ATP)</h3>
+                                    <ul class="list-disc pl-5 text-sm font-bold text-slate-600 dark:text-slate-400 space-y-1">
+                                        <li><strong>Difusi:</strong> Perpindahan molekul zat terlarut dari konsentrasi tinggi (hipertonis) ke rendah (hipotonis) hingga isotonis.</li>
+                                        <li><strong>Osmosis:</strong> Perpindahan pelarut (air) melintasi membran semi-permeabel dari hipotonis (banyak air) ke hipertonis (sedikit air).</li>
+                                        <li><strong>Difusi Terfasilitasi:</strong> Difusi dibantu oleh protein saluran (channel protein) di membran untuk molekul besar/polar.</li>
+                                    </ul>
+                                </div>
+                                <div class="border-l-4 border-rose-400 pl-4 py-2">
+                                    <h3 class="text-base font-black text-slate-800 dark:text-white uppercase mb-1">B. Transpor Aktif (Membutuhkan ATP)</h3>
+                                    <ul class="list-disc pl-5 text-sm font-bold text-slate-600 dark:text-slate-400 space-y-1">
+                                        <li><strong>Pompa Ion:</strong> Contohnya Pompa Natrium-Kalium (Na+-K+) yang melawan gradien konsentrasi saraf.</li>
+                                        <li><strong>Endositosis:</strong> Sel "menelan" makromolekul. Fagositosis (memakan partikel padat), Pinositosis (meminum cairan).</li>
+                                        <li><strong>Eksositosis:</strong> Pengeluaran zat dari dalam sel menggunakan vesikula yang menyatu dengan membran plasma.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="sub-learn-video" class="sub-learn hidden space-y-6 animate-fade-in">
+                        <div class="box-card p-6 lg:p-10 bg-slate-900 text-white text-center rounded-[2rem] border-4 border-slate-800">
+                            <i class="fa-brands fa-youtube text-5xl text-rose-500 mb-4 drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]"></i>
+                            <h3 class="font-black text-2xl uppercase mb-3 text-brand-400 tracking-wider">Materi Kelas XI: Struktur dan Fungsi Sel</h3>
+                            <p class="text-sm font-bold text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed">Simak video penjelasan mendalam sesuai silabus Kurikulum Merdeka Fase F mengenai struktur organel sel eukariotik beserta mekanisme bioproses yang terjadi di dalamnya.</p>
+                            
+                            <!-- Embedded YouTube Video -->
+                            <div class="aspect-video w-full max-w-4xl mx-auto rounded-2xl flex items-center justify-center border-4 border-slate-700 shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden bg-black">
+                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/Xxm6xtjsFx0?si=LxQBxfBL97Z6YN5i" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="sub-learn-video" class="sub-learn hidden space-y-6 animate-fade-in">
+                        <div class="box-card p-8 bg-slate-900 text-white text-center rounded-[2rem] border-4 border-slate-800">
+                            <i class="fa-brands fa-youtube text-6xl text-rose-500 mb-6 drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]"></i>
+                            <h3 class="font-black text-2xl uppercase mb-3">Video Sinematik: Perjalanan Ke Dalam Sel</h3>
+                            <p class="text-sm font-bold text-slate-400 mb-8 max-w-lg mx-auto">Saksikan visualisasi nyata bagaimana organel-organel bekerja secara harmoni layaknya sebuah kota metropolitan mikroskopis.</p>
+                            <div class="aspect-video bg-black rounded-2xl flex items-center justify-center border-2 border-slate-700 shadow-2xl overflow-hidden relative group cursor-pointer">
+                                <img src="https://placehold.co/1280x720/1e293b/475569?text=Thumbnail+Video" class="w-full h-full object-cover opacity-50 group-hover:scale-105 transition duration-500">
+                                <div class="absolute w-20 h-20 bg-rose-600 rounded-full flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(244,63,94,0.6)] group-hover:bg-rose-500 transition"><i class="fa-solid fa-play ml-1"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="sub-learn-animasi" class="sub-learn hidden animate-fade-in">
+                        <div class="box-card p-12 border-t-8 border-amber-500 bg-amber-50 dark:bg-amber-900/10 text-center rounded-[2rem]">
+                            <i class="fa-solid fa-cube text-6xl text-amber-500 mb-6 animate-spin-slow drop-shadow-md"></i>
+                            <h3 class="font-black text-2xl uppercase text-amber-700 dark:text-amber-400 mb-2">Galeri Animasi 3D Organel</h3>
+                            <p class="text-sm font-bold text-amber-600/70 max-w-md mx-auto mb-6">Modul simulasi lipatan protein dan replikasi DNA dalam format 3D Interaktif sedang disiapkan.</p>
+                            <button class="px-6 py-2 bg-amber-200 text-amber-800 rounded-full font-black text-xs uppercase opacity-50 cursor-not-allowed">Coming Soon</button>
+                        </div>
+                    </div>
+                    
+                    <div id="sub-learn-infografis" class="sub-learn hidden animate-fade-in">
+                        <div class="box-card p-4 rounded-[2rem] bg-slate-900">
+                            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-8 flex items-center justify-center min-h-[500px]">
+                                <h1 class="text-5xl font-black text-white/20 uppercase transform -rotate-12">Infografis Interaktif<br>Bagan Anatomi</h1>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: EXPLORE -->
+                <section id="tab-explore" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Explore Cell Anatomy</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Klik organel untuk mengetahui fungsinya</p>
+                    </div>
+                    <div class="box-card p-4 lg:p-8 bg-slate-900 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-4 border-slate-800">
+                        
+                        <!-- Interactive Cell Map (Abstracted with CSS shapes for safety and visual pop) -->
+                        <div class="lg:col-span-2 relative aspect-square max-w-md mx-auto bg-emerald-100 rounded-[4rem] border-8 border-emerald-600 shadow-[inset_0_0_50px_rgba(16,185,129,0.3)] flex items-center justify-center p-8">
+                            <div class="absolute inset-0 opacity-10 font-black text-6xl flex items-center justify-center -rotate-12 pointer-events-none text-emerald-900">SEL TUMBUHAN</div>
+                            
+                            <!-- Nucleus -->
+                            <button onclick="showInfo('Nukleus', 'Pusat kendali sel. Menyimpan DNA (materi genetik) dan mengatur seluruh aktivitas sel.', 'fa-dna', 'text-purple-500')" class="absolute top-1/4 left-1/4 w-24 h-24 bg-purple-400 rounded-full border-4 border-purple-600 shadow-lg hover:scale-110 hover:shadow-purple-500/50 transition flex items-center justify-center text-white"><i class="fa-solid fa-dna text-2xl drop-shadow-md"></i></button>
+                            
+                            <!-- Vacuole -->
+                            <button onclick="showInfo('Vakuola', 'Kantung besar penyimpan cadangan air, nutrisi, dan zat sisa. Memberikan turgor (kekakuan) pada sel tumbuhan.', 'fa-droplet', 'text-blue-500')" class="absolute bottom-1/4 right-1/4 w-32 h-32 bg-blue-300 rounded-[2rem] border-4 border-blue-500 shadow-lg hover:scale-110 transition flex items-center justify-center text-white opacity-80"><i class="fa-solid fa-droplet text-4xl"></i></button>
+                            
+                            <!-- Mitochondria 1 -->
+                            <button onclick="showInfo('Mitokondria', 'Pembangkit energi sel (Powerhouse). Tempat terjadinya respirasi seluler yang menghasilkan ATP.', 'fa-bolt', 'text-amber-500')" class="absolute top-1/3 right-8 w-16 h-12 bg-amber-400 rounded-full border-4 border-amber-600 shadow-lg hover:scale-110 transition flex items-center justify-center text-white rotate-45"><i class="fa-solid fa-bolt"></i></button>
+                            
+                            <!-- Chloroplast -->
+                            <button onclick="showInfo('Kloroplas', 'Hanya ada di sel tumbuhan. Mengandung klorofil untuk melakukan proses fotosintesis (membuat makanan).', 'fa-leaf', 'text-emerald-700')" class="absolute bottom-1/3 left-8 w-16 h-20 bg-emerald-500 rounded-full border-4 border-emerald-700 shadow-lg hover:scale-110 transition flex items-center justify-center text-white -rotate-12"><i class="fa-solid fa-leaf"></i></button>
+                        </div>
+                        
+                        <!-- Info Panel -->
+                        <div class="lg:col-span-1 bg-slate-800 rounded-2xl p-6 text-white min-h-[250px] flex flex-col">
+                            <div id="explore-placeholder" class="m-auto text-center text-slate-500 font-black uppercase text-sm">
+                                <i class="fa-solid fa-hand-pointer text-3xl mb-3 block animate-bounce-slight"></i> Klik salah satu organel pada gambar.
+                            </div>
+                            <div id="explore-info" class="hidden">
+                                <i id="exp-icon" class="fa-solid fa-cube text-4xl mb-4"></i>
+                                <h3 id="exp-title" class="text-2xl font-black uppercase tracking-tight text-white mb-2 border-b border-slate-700 pb-2">Nama</h3>
+                                <p id="exp-desc" class="text-sm font-bold text-slate-300 leading-relaxed">Deskripsi</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: LABORATORY (Virtual Microscope) -->
+                <section id="tab-lab" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4 flex justify-between items-end flex-wrap gap-4">
+                        <div>
+                            <h2 class="text-3xl font-black uppercase tracking-tight">Virtual Laboratory</h2>
+                            <p class="text-sm font-bold text-slate-500 uppercase">Simulasi Praktikum & Eksekusi Proses Sel</p>
+                        </div>
+                        <button onclick="generateLabReport()" class="box-btn px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-1 transition duration-300 border-2 border-emerald-400">
+                            <i class="fa-solid fa-print mr-2"></i> Cetak Laporan Lab
+                        </button>
+                    </div>
+                    
+                    <!-- Sub-Navigation Lab -->
+                    <div class="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto custom-scrollbar">
+                        <button id="btn-sub-lab-mikroskop" onclick="activateSubTab('lab', 'mikroskop')" class="btn-sub-lab px-4 py-2 rounded-xl font-black text-xs uppercase bg-brand-500 text-white whitespace-nowrap shadow-md transition">🔬 Mikroskop Virtual</button>
+                        <button id="btn-sub-lab-osmosis" onclick="activateSubTab('lab', 'osmosis')" class="btn-sub-lab px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">💧 Osmosis & Difusi</button>
+                        <button id="btn-sub-lab-fotosintesis" onclick="activateSubTab('lab', 'fotosintesis')" class="btn-sub-lab px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🌱 Reaktor Fotosintesis</button>
+                    </div>
+
+                    <!-- Lab: Microscope -->
+                    <div id="sub-lab-mikroskop" class="sub-lab animate-fade-in">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <div class="lg:col-span-7 bg-slate-900 rounded-[2rem] p-6 shadow-xl border-4 border-slate-800 flex flex-col items-center relative overflow-hidden">
+                                <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 z-10 bg-black/50 px-4 py-1 rounded-full border border-slate-700">Lensa Okuler (10x)</h3>
+                                
+                                <div class="w-64 h-64 sm:w-80 sm:h-80 rounded-full border-8 border-black bg-black overflow-hidden relative shadow-[inset_0_0_80px_rgba(0,0,0,1)] z-10 flex items-center justify-center ring-4 ring-slate-800">
+                                    <div id="microscope-view" class="w-full h-full bg-slate-200 bg-cover bg-center transition-all duration-300 filter blur-xl brightness-50" style="transform: scale(1);"></div>
+                                    <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-40 mix-blend-overlay">
+                                        <div class="w-full h-[2px] bg-black absolute"></div>
+                                        <div class="h-full w-[2px] bg-black absolute"></div>
+                                        <div class="w-full h-full border-4 border-black rounded-full absolute"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-8 flex gap-4 z-10 bg-black/40 p-3 rounded-xl border border-slate-700 backdrop-blur-md">
+                                    <span class="text-slate-300 text-xs font-black uppercase tracking-wider">Perbesaran: <span id="total-mag" class="text-brand-400 ml-1 text-sm">40x</span></span>
+                                    <span class="text-slate-600">|</span>
+                                    <span class="text-slate-300 text-xs font-black uppercase tracking-wider">Status Visual: <span id="focus-status" class="text-rose-400 ml-1 text-sm animate-pulse">Buram</span></span>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-5 space-y-4">
+                                <div class="box-card p-5">
+                                    <h4 class="font-black uppercase text-xs mb-3 text-slate-500"><i class="fa-solid fa-layer-group mr-2"></i> 1. Preparat Slide</h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button onclick="setSlide('plant')" id="btn-slide-plant" class="p-3 border-2 border-slate-200 rounded-xl text-xs font-black uppercase hover:border-emerald-500 transition">Epitel Bawang</button>
+                                        <button onclick="setSlide('animal')" id="btn-slide-animal" class="p-3 border-2 border-slate-200 rounded-xl text-xs font-black uppercase hover:border-rose-500 transition">Epitel Pipi</button>
+                                    </div>
+                                </div>
+                                <div class="box-card p-5">
+                                    <h4 class="font-black uppercase text-xs mb-3 text-slate-500"><i class="fa-solid fa-eye mr-2"></i> 2. Lensa Objektif</h4>
+                                    <div class="flex gap-2 bg-slate-100 p-1 rounded-xl">
+                                        <button onclick="setLens(4)" id="btn-lens-4" class="flex-1 py-2 rounded-lg font-black text-sm bg-white shadow-sm text-brand-600 transition">4x</button>
+                                        <button onclick="setLens(10)" id="btn-lens-10" class="flex-1 py-2 rounded-lg font-black text-sm text-slate-500 hover:bg-white/50 transition">10x</button>
+                                        <button onclick="setLens(40)" id="btn-lens-40" class="flex-1 py-2 rounded-lg font-black text-sm text-slate-500 hover:bg-white/50 transition">40x</button>
+                                    </div>
+                                </div>
+                                <div class="box-card p-5 space-y-4 bg-slate-800 text-white border-none">
+                                    <h4 class="font-black uppercase text-xs mb-2 text-slate-400"><i class="fa-solid fa-sliders mr-2"></i> 3. Panel Kontrol Instrumen</h4>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-300 flex justify-between mb-2">Makrometer (Kasar) <span id="val-coarse" class="text-brand-400">0</span></label><input type="range" id="slider-coarse" min="-50" max="50" value="-50" class="w-full accent-brand-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateMicroscope()"></div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-300 flex justify-between mb-2">Mikrometer (Halus) <span id="val-fine" class="text-brand-400">0</span></label><input type="range" id="slider-fine" min="-10" max="10" value="0" class="w-full accent-brand-400 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateMicroscope()"></div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-300 flex justify-between mb-2">Intensitas Cahaya <span id="val-light" class="text-amber-400">50%</span></label><input type="range" id="slider-light" min="10" max="150" value="50" class="w-full accent-amber-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateMicroscope()"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lab: Osmosis -->
+                    <div id="sub-lab-osmosis" class="sub-lab hidden animate-fade-in">
+                        <div class="box-card p-12 bg-slate-900 border-4 border-slate-800 text-white text-center py-16 rounded-[2rem] relative overflow-hidden">
+                            <div class="absolute -left-20 -top-20 w-64 h-64 bg-blue-600 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse"></div>
+                            <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-cyan-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse"></div>
+                            
+                            <i class="fa-solid fa-water text-6xl text-blue-400 mb-6 drop-shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-bounce-slight"></i>
+                            <h3 class="font-black text-3xl uppercase mb-3 tracking-tight">Simulator Osmosis & Difusi</h3>
+                            <p class="text-sm font-bold text-slate-300 max-w-lg mx-auto mb-8 leading-relaxed">Observasi visual perpindahan molekul pelarut dan zat terlarut melintasi membran semi-permeabel secara *real-time* berdasarkan pengaturan gradien konsentrasi.</p>
+                            
+                            <div class="flex flex-wrap justify-center gap-4 relative z-10">
+                                <button class="px-8 py-3 bg-blue-600 hover:bg-blue-500 border-2 border-blue-400 rounded-xl font-black text-sm uppercase shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-1"><i class="fa-solid fa-droplet mr-2"></i> Eksekusi Difusi</button>
+                                <button class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 border-2 border-cyan-400 rounded-xl font-black text-sm uppercase shadow-lg shadow-cyan-500/30 transition transform hover:-translate-y-1"><i class="fa-solid fa-arrow-right-arrow-left mr-2"></i> Eksekusi Osmosis</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lab: Photosynthesis -->
+                    <div id="sub-lab-fotosintesis" class="sub-lab hidden animate-fade-in">
+                        <div class="box-card p-10 border-t-8 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-center rounded-[2rem]">
+                            <i class="fa-solid fa-leaf text-6xl text-emerald-500 mb-6 drop-shadow-md"></i>
+                            <h3 class="font-black text-3xl uppercase mb-3 text-emerald-800 dark:text-emerald-400 tracking-tight">Reaktor Kloroplas</h3>
+                            <p class="text-sm font-bold text-slate-600 dark:text-slate-400 max-w-lg mx-auto mb-10 leading-relaxed">Manipulasi parameter abiotik lingkungan (Cahaya, CO₂, dan Ketersediaan Air) untuk menganalisis dampaknya terhadap kurva laju sintesis glukosa dan oksigen.</p>
+                            
+                            <div class="max-w-md mx-auto space-y-6 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                <div>
+                                    <div class="flex justify-between mb-1"><span class="text-xs font-black uppercase text-amber-500"><i class="fa-solid fa-sun mr-1"></i> Intensitas Cahaya</span> <span class="text-xs font-bold text-slate-500">80%</span></div>
+                                    <input type="range" min="0" max="100" value="80" class="w-full accent-amber-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1"><span class="text-xs font-black uppercase text-slate-600"><i class="fa-solid fa-cloud mr-1"></i> Konsentrasi CO₂</span> <span class="text-xs font-bold text-slate-500">50%</span></div>
+                                    <input type="range" min="0" max="100" value="50" class="w-full accent-slate-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1"><span class="text-xs font-black uppercase text-blue-500"><i class="fa-solid fa-droplet mr-1"></i> Ketersediaan Air</span> <span class="text-xs font-bold text-slate-500">70%</span></div>
+                                    <input type="range" min="0" max="100" value="70" class="w-full accent-blue-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <button class="w-full py-3 mt-4 bg-emerald-600 text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 transition"><i class="fa-solid fa-play mr-2"></i> Jalankan Reaksi</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: INVESTIGATE (Cell Hospital) -->
+                <section id="tab-investigate" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-rose-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Investigate</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Analisis Forensik & Diagnosis Medis Seluler</p>
+                    </div>
+                    
+                    <!-- Sub-Navigation Investigate -->
+                    <div class="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto custom-scrollbar">
+                        <button id="btn-sub-inv-hospital" onclick="activateSubTab('inv', 'hospital')" class="btn-sub-inv px-4 py-2 rounded-xl font-black text-xs uppercase bg-brand-500 text-white whitespace-nowrap shadow-md transition">🏥 Cell Hospital</button>
+                        <button id="btn-sub-inv-detective" onclick="activateSubTab('inv', 'detective')" class="btn-sub-inv px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🕵️ Cell Detective</button>
+                        <button id="btn-sub-inv-emergency" onclick="activateSubTab('inv', 'emergency')" class="btn-sub-inv px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🚨 Protocol Emergency</button>
+                    </div>
+
+                    <!-- Inv: Hospital -->
+                    <div id="sub-inv-hospital" class="sub-inv animate-fade-in">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="box-card p-8 bg-slate-900 text-white border-t-8 border-rose-500 rounded-[2rem] shadow-xl relative overflow-hidden">
+                                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/40 via-slate-900 to-slate-900 opacity-50"></div>
+                                <h3 class="font-black text-lg uppercase text-rose-400 mb-6 flex items-center relative z-10 tracking-widest"><i class="fa-solid fa-heart-pulse mr-3 text-2xl animate-pulse"></i> Monitor Gejala Pasien</h3>
+                                <div class="bg-black/60 p-6 rounded-2xl border border-rose-500/30 min-h-[120px] flex items-center relative z-10 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+                                    <p id="inv-symptom" class="text-sm font-black text-rose-300 leading-relaxed font-mono">"Sistem deteksi mendapati kegagalan produksi ATP secara masif. Aktivitas sitoplasma terhenti total akibat defisit energi."</p>
+                                </div>
+                                <button onclick="nextInvestigation()" class="w-full py-3 bg-slate-800 border-2 border-slate-700 rounded-xl font-black text-xs uppercase mt-6 hover:bg-slate-700 transition relative z-10 tracking-widest text-slate-300">Rekam Medis Selanjutnya <i class="fa-solid fa-forward-step ml-2"></i></button>
+                            </div>
+                            <div class="box-card p-8 border-2 border-slate-200 dark:border-slate-700 rounded-[2rem] bg-white dark:bg-slate-900">
+                                <h3 class="font-black uppercase text-slate-800 dark:text-white mb-6 text-lg tracking-tight">Tindakan Medis: Identifikasi Organel Rusak</h3>
+                                <div class="grid grid-cols-2 gap-4" id="inv-options">
+                                    <button onclick="checkDiagnosis('Mitokondria')" class="p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-black uppercase text-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition shadow-sm">Mitokondria</button>
+                                    <button onclick="checkDiagnosis('Ribosom')" class="p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-black uppercase text-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition shadow-sm">Ribosom</button>
+                                    <button onclick="checkDiagnosis('Lisosom')" class="p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-black uppercase text-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition shadow-sm">Lisosom</button>
+                                    <button onclick="checkDiagnosis('Nukleus')" class="p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-black uppercase text-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition shadow-sm">Nukleus</button>
+                                </div>
+                                <div id="inv-result" class="mt-6 p-4 rounded-xl hidden text-center font-black uppercase text-xs border-2 tracking-widest"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inv: Detective -->
+                    <div id="sub-inv-detective" class="sub-inv hidden animate-fade-in">
+                        <div class="box-card p-12 border-t-8 border-slate-800 bg-slate-100 dark:bg-slate-800 text-center rounded-[2rem]">
+                            <i class="fa-solid fa-magnifying-glass text-6xl text-slate-600 dark:text-slate-300 mb-6 drop-shadow-md"></i>
+                            <h3 class="font-black text-3xl uppercase mb-3 text-slate-800 dark:text-white tracking-tight">TKP Forensik Sel</h3>
+                            <p class="text-sm font-bold text-slate-500 dark:text-slate-400 max-w-lg mx-auto mb-8">Investigasi tempat kejadian perkara mikroskopis. Analisis petunjuk visual untuk menemukan organel spesifik yang menghilang secara misterius dari sitoplasma.</p>
+                            <button class="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-black text-sm uppercase shadow-lg transition"><i class="fa-solid fa-fingerprint mr-2"></i> Buka Berkas Kasus</button>
+                        </div>
+                    </div>
+
+                    <!-- Inv: Emergency -->
+                    <div id="sub-inv-emergency" class="sub-inv hidden animate-fade-in">
+                        <div class="box-card p-12 border-t-8 border-rose-600 bg-rose-50 dark:bg-rose-900/20 text-center rounded-[2rem] relative overflow-hidden">
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-10"></div>
+                            <i class="fa-solid fa-triangle-exclamation text-6xl text-rose-600 mb-6 animate-pulse drop-shadow-[0_0_15px_rgba(225,29,72,0.8)] relative z-10"></i>
+                            <h3 class="font-black text-3xl uppercase mb-3 text-rose-800 dark:text-rose-400 tracking-widest relative z-10">Kondisi Kritis</h3>
+                            <p class="text-sm font-black text-rose-600/80 max-w-lg mx-auto mb-8 leading-relaxed relative z-10">ALARM! Terdeteksi kebocoran parah pada membran lisosom! Segera rumuskan protokol netralisasi enzim sebelum sel mengalami autolisis total.</p>
+                            <button class="px-8 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-black text-sm uppercase shadow-lg shadow-rose-500/30 transition relative z-10"><i class="fa-solid fa-shield-halved mr-2"></i> Aktifkan Protokol Penyelamatan</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: THINK (What If?) -->
+                <section id="tab-think" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-amber-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Think: What If?</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Simulasi Kondisi Ekstrem Sel Tumbuhan</p>
+                    </div>
+                    <div class="box-card overflow-hidden">
+                        <div class="p-6 bg-slate-50 border-b border-slate-200">
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="runWhatIf('kering')" class="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-xs uppercase hover:bg-amber-100 transition"><i class="fa-solid fa-sun text-amber-500 mr-1"></i> Kurang Air (Kering)</button>
+                                <button onclick="runWhatIf('gelap')" class="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-xs uppercase hover:bg-slate-200 transition"><i class="fa-solid fa-moon text-slate-500 mr-1"></i> Gelap Total</button>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col md:flex-row items-center gap-6">
+                            <div id="wi-cell-visual" class="w-40 h-40 bg-emerald-100 rounded-lg border-4 border-emerald-500 flex items-center justify-center transition-all duration-1000 relative overflow-hidden flex-shrink-0">
+                                <div id="wi-vacuole" class="w-20 h-20 bg-blue-200 rounded-full border border-blue-400 transition-all duration-1000 absolute"></div>
+                                <div id="wi-chloro" class="w-6 h-6 bg-emerald-500 rounded-full absolute top-2 left-2 transition-opacity duration-1000"></div>
+                            </div>
+                            <div>
+                                <h4 class="font-black uppercase text-sm mb-1 text-slate-700">Laporan Observasi</h4>
+                                <p id="wi-report" class="text-sm font-bold text-slate-500 leading-relaxed italic border-l-4 border-slate-300 pl-3">Klik tombol skenario di atas untuk menjalankan simulasi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: GAME (Build a Cell) -->
+                <section id="tab-game" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-emerald-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight text-emerald-600">Game Center</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Tantangan Interaktif & Evaluasi Menyenangkan</p>
+                    </div>
+                    
+                    <!-- Sub-Navigation Game -->
+                    <div class="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto custom-scrollbar">
+                        <button id="btn-sub-game-build" onclick="activateSubTab('game', 'build')" class="btn-sub-game px-4 py-2 rounded-xl font-black text-xs uppercase bg-brand-500 text-white whitespace-nowrap shadow-md transition">🧩 Build Cell</button>
+                        <button id="btn-sub-game-puzzle" onclick="activateSubTab('game', 'puzzle')" class="btn-sub-game px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🖼️ Jigsaw Puzzle</button>
+                        <button id="btn-sub-game-skyquiz" onclick="activateSubTab('game', 'skyquiz')" class="btn-sub-game px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">☄️ Sky Quiz</button>
+                        <button id="btn-sub-game-mission" onclick="activateSubTab('game', 'mission')" class="btn-sub-game px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">📋 Daily Mission</button>
+                    </div>
+
+                    <!-- Game: Build Cell -->
+                    <div id="sub-game-build" class="sub-game animate-fade-in">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div class="bg-slate-100 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
+                                <h3 class="font-black uppercase text-xs mb-4 text-center text-slate-500 dark:text-slate-400 tracking-widest border-b border-slate-300 dark:border-slate-600 pb-2"><i class="fa-solid fa-box-open mr-2"></i> Inventori Organel</h3>
+                                <div class="flex flex-col gap-3" id="organelle-dock">
+                                    <div class="organelle-drag p-3 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-center font-black uppercase text-[10px] shadow-sm hover:shadow-md transition cursor-grab" draggable="true" ondragstart="drag(event)" id="d-mito" data-type="Mitokondria"><i class="fa-solid fa-bolt text-amber-500 text-xl pointer-events-none block mb-1"></i> Mitokondria</div>
+                                    <div class="organelle-drag p-3 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-center font-black uppercase text-[10px] shadow-sm hover:shadow-md transition cursor-grab" draggable="true" ondragstart="drag(event)" id="d-nukleus" data-type="Nukleus"><i class="fa-solid fa-dna text-purple-500 text-xl pointer-events-none block mb-1"></i> Nukleus</div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 bg-sky-50 dark:bg-sky-900/20 rounded-[3rem] border-4 border-sky-200 dark:border-sky-800 min-h-[350px] relative p-8 flex flex-wrap gap-6 items-center justify-center shadow-inner">
+                                <div class="absolute inset-0 opacity-10 font-black text-6xl flex items-center justify-center pointer-events-none text-sky-900">BLUEPRINT SEL</div>
+                                <div class="drop-zone w-24 h-24 flex items-center justify-center m-2 relative bg-white/60 dark:bg-slate-800/60 rounded-2xl shadow-sm border-2 border-dashed border-sky-300 backdrop-blur-sm transition-all" data-target="Nukleus" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <span class="absolute text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mt-14">Slot Inti<br>(Pusat)</span>
+                                </div>
+                                <div class="drop-zone w-24 h-24 flex items-center justify-center m-2 relative bg-white/60 dark:bg-slate-800/60 rounded-2xl shadow-sm border-2 border-dashed border-sky-300 backdrop-blur-sm transition-all" data-target="Mitokondria" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <span class="absolute text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mt-14">Slot Energi<br>(Respirasi)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game: Puzzle -->
+                    <div id="sub-game-puzzle" class="sub-game hidden animate-fade-in">
+                        <div class="box-card p-16 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 text-center border-4 border-indigo-100 dark:border-indigo-800 rounded-[3rem]">
+                            <i class="fa-solid fa-puzzle-piece text-7xl text-indigo-500 mb-6 drop-shadow-md"></i>
+                            <h3 class="font-black text-3xl uppercase text-indigo-800 dark:text-indigo-300 mb-3 tracking-tight">Jigsaw Mikroskopis</h3>
+                            <p class="font-bold text-indigo-600/70 dark:text-indigo-400 text-sm max-w-md mx-auto mb-8">Susun kembali potongan-potongan gambar struktur anatomi sel yang berantakan dalam batas waktu tertentu untuk mendapatkan koin bonus.</p>
+                            <button onclick="playPuzzle(this)" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm uppercase shadow-lg shadow-indigo-500/30 transition"><i class="fa-solid fa-play mr-2"></i> Mainkan Puzzle</button>
+                        </div>
+                    </div>
+
+                    <!-- Game: Sky Quiz -->
+                    <div id="sub-game-skyquiz" class="sub-game hidden animate-fade-in">
+                        <div class="box-card p-16 bg-slate-900 text-center border-4 border-slate-800 rounded-[3rem] relative overflow-hidden">
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-40 animate-spin-slow"></div>
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-indigo-900/80"></div>
+                            <div class="relative z-10">
+                                <i class="fa-solid fa-meteor text-7xl text-amber-400 mb-6 drop-shadow-[0_0_25px_rgba(251,191,36,0.9)] animate-bounce-slight"></i>
+                                <h3 class="font-black text-4xl uppercase text-white tracking-[0.2em] mb-4">Sky Quiz</h3>
+                                <p class="font-bold text-indigo-200 text-sm mb-10 max-w-lg mx-auto leading-relaxed">Tantangan kecepatan! Tangkap blok jawaban yang benar saat mereka jatuh dari langit angkasa seluler sebelum membentur dasar.</p>
+                                <button onclick="playSkyQuiz(this)" class="px-10 py-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full font-black uppercase tracking-widest text-white shadow-xl shadow-amber-500/40 hover:scale-105 transition duration-300 border-2 border-amber-300 text-sm">Mulai Petualangan <i class="fa-solid fa-rocket ml-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game: Mission -->
+                    <div id="sub-game-mission" class="sub-game hidden animate-fade-in">
+                        <div class="box-card p-8 border-l-8 border-amber-500 rounded-2xl">
+                            <h3 class="font-black text-2xl uppercase mb-6 text-amber-600 tracking-tight"><i class="fa-solid fa-clipboard-list mr-3"></i> Log Misi Harian</h3>
+                            <ul class="space-y-4 font-bold text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-amber-300 transition">
+                                    <span class="flex items-center"><i class="fa-regular fa-circle mr-3 text-slate-400 text-lg"></i> Selesaikan 1 Praktikum Mikroskop Virtual</span> 
+                                    <span class="text-xs font-black bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg uppercase tracking-wider">+50 XP</span>
+                                </li>
+                                <li class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-amber-300 transition">
+                                    <span class="flex items-center"><i class="fa-regular fa-circle mr-3 text-slate-400 text-lg"></i> Sembuhkan 3 Sel di Cell Hospital</span> 
+                                    <span class="text-xs font-black bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg uppercase tracking-wider">+100 XP</span>
+                                </li>
+                                <li class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-amber-300 transition">
+                                    <span class="flex items-center"><i class="fa-solid fa-circle-check mr-3 text-emerald-500 text-lg"></i> Kerjakan Evaluasi Quiz 15 Soal</span> 
+                                    <span class="text-xs font-black bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg uppercase tracking-wider">SELESAI</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: JOURNAL (LKPD) -->
+                <section id="tab-journal" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">Lab Journal</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Lembar Kerja Peserta Didik (LKPD)</p>
+                    </div>
+                    <div class="box-card p-6">
+                        <p class="text-xs font-bold text-slate-500 mb-6 border-l-4 border-brand-500 pl-3">Jawablah pertanyaan di bawah ini berdasarkan hasil praktikum dan eksplorasimu. (Soal disiapkan oleh guru).</p>
+                        
+                        <div id="student-lkpd-container" class="space-y-4">
+                            <!-- Soal dimuat dinamis dari database/localStorage -->
+                        </div>
+                        
+                        <button onclick="submitJournal()" class="mt-6 box-btn w-full py-3 bg-brand-600 text-white font-black text-sm uppercase rounded-xl hover:bg-brand-500 shadow-md">Simpan ke Jurnal <i class="fa-solid fa-check ml-1"></i></button>
+                    </div>
+                </section>
+
+                <!-- TAB: ASSESSMENT (QUIZ) -->
+                <section id="tab-assessment" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4 flex justify-between items-end flex-wrap gap-4">
+                        <div>
+                            <h2 class="text-3xl font-black uppercase tracking-tight">Assessment Module</h2>
+                            <p class="text-sm font-bold text-slate-500 uppercase">Evaluasi Kompetensi Mandiri Terstruktur</p>
+                        </div>
+                        <div id="quiz-score-display" class="hidden bg-emerald-50 text-emerald-700 px-6 py-3 rounded-2xl font-black text-xl border-2 border-emerald-400 shadow-lg flex items-center"><i class="fa-solid fa-award text-2xl mr-3 text-emerald-500"></i> Nilai Akhir: <span id="q-score" class="ml-2">100</span></div>
+                    </div>
+
+                    <!-- Sub-Navigation Assessment -->
+                    <div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto custom-scrollbar">
+                        <button id="btn-sub-assessment-pre" onclick="activateSubTab('assessment', 'pre')" class="btn-sub-assessment px-4 py-2 rounded-xl font-black text-xs uppercase bg-brand-500 text-white whitespace-nowrap shadow-md transition">📝 Pre-Test</button>
+                        <button id="btn-sub-assessment-quiz" onclick="activateSubTab('assessment', 'quiz')" class="btn-sub-assessment px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">📝 Ujian Utama (15 Soal)</button>
+                        <button id="btn-sub-assessment-post" onclick="activateSubTab('assessment', 'post')" class="btn-sub-assessment px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">📝 Post-Test</button>
+                        <button id="btn-sub-assessment-achieve" onclick="activateSubTab('assessment', 'achieve')" class="btn-sub-assessment px-4 py-2 rounded-xl font-black text-xs uppercase bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 whitespace-nowrap transition">🏆 Hall of Fame</button>
+                    </div>
+
+                    <!-- Assess: Pre-Test -->
+                    <div id="sub-assessment-pre" class="sub-assessment animate-fade-in">
+                        <div class="box-card p-12 bg-brand-50 dark:bg-brand-900/20 text-center rounded-[2rem] border-2 border-brand-200 dark:border-brand-800">
+                            <i class="fa-solid fa-hourglass-start text-6xl text-brand-500 mb-6 drop-shadow-sm"></i>
+                            <h3 class="font-black text-3xl uppercase text-brand-800 dark:text-brand-300 mb-3 tracking-tight">Ujian Diagnostik (Pre-Test)</h3>
+                            <p class="font-bold text-brand-600/80 dark:text-brand-400/80 text-sm mb-8 max-w-lg mx-auto">Uji peta pengetahuan dasar Anda sebelum mengeksplorasi ekosistem laboratorium seluler lebih dalam. Nilai ini tidak memengaruhi rapor akhir.</p>
+                            <button class="box-btn px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-black text-sm uppercase rounded-xl shadow-lg shadow-brand-500/30 transition">Mulai Pre-Test Sekarang</button>
+                        </div>
+                    </div>
+
+                    <!-- Assess: Quiz (15 Soal) -->
+                    <div id="sub-assessment-quiz" class="sub-assessment hidden animate-fade-in">
+                        <div class="box-card p-8 space-y-8 rounded-[2rem]">
+                            <div class="bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-500 p-5 rounded-r-xl mb-2 text-sm font-bold text-amber-800 dark:text-amber-300 flex items-start shadow-sm">
+                                <i class="fa-solid fa-circle-exclamation mt-0.5 mr-3 text-lg"></i>
+                                <div><strong class="uppercase font-black block mb-1">Perhatian Akademik</strong> Sistem Evaluasi Utama terdiri dari 15 butir soal pilihan ganda. Kerjakan seluruh soal dengan teliti. Nilai yang diperoleh akan dienkripsi dan langsung terekam pada server Database Guru (Control Panel).</div>
+                            </div>
+                            
+                            <!-- Wadah Soal Dinamis -->
+                            <div id="quiz-dynamic-container" class="space-y-6">
+                                <!-- Soal digenerate via Javascript -->
+                            </div>
+                            
+                            <button onclick="submitDynamicQuiz()" class="box-btn w-full py-5 mt-4 bg-gradient-to-r from-brand-600 to-accent-600 text-white font-black text-lg tracking-widest uppercase rounded-2xl shadow-xl shadow-brand-500/40 hover:shadow-brand-500/60 transform hover:-translate-y-1 transition duration-300 border-2 border-brand-400/50">
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Kumpulkan Lembar Jawaban
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Assess: Post-Test -->
+                    <div id="sub-assessment-post" class="sub-assessment hidden animate-fade-in">
+                        <div class="box-card p-12 bg-emerald-50 dark:bg-emerald-900/20 text-center rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-800">
+                            <i class="fa-solid fa-flag-checkered text-6xl text-emerald-500 mb-6 drop-shadow-sm"></i>
+                            <h3 class="font-black text-3xl uppercase text-emerald-800 dark:text-emerald-300 mb-3 tracking-tight">Evaluasi Komprehensif (Post-Test)</h3>
+                            <p class="font-bold text-emerald-600/80 dark:text-emerald-400/80 text-sm mb-8 max-w-lg mx-auto">Selesaikan rangkaian ujian tahap akhir untuk mengukur lonjakan pemahaman kognitif Anda pasca simulasi laboratorium interaktif.</p>
+                            <button class="box-btn px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase rounded-xl shadow-lg shadow-emerald-500/30 transition">Buka Segel Post-Test</button>
+                        </div>
+                    </div>
+
+                    <!-- Assess: Achievement -->
+                    <div id="sub-assessment-achieve" class="sub-assessment hidden animate-fade-in">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div class="box-card p-6 text-center bg-amber-50 dark:bg-slate-800 border-2 border-amber-200 dark:border-slate-700 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition duration-500 cursor-pointer rounded-2xl">
+                                <i class="fa-solid fa-microscope text-5xl text-amber-500 mb-4 drop-shadow-sm"></i>
+                                <p class="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300">Master<br>Microscopist</p>
+                            </div>
+                            <div class="box-card p-6 text-center bg-rose-50 dark:bg-slate-800 border-2 border-rose-200 dark:border-slate-700 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition duration-500 cursor-pointer rounded-2xl">
+                                <i class="fa-solid fa-heart-pulse text-5xl text-rose-500 mb-4 drop-shadow-sm"></i>
+                                <p class="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300">Elite Cell<br>Doctor</p>
+                            </div>
+                            <div class="box-card p-6 text-center bg-sky-50 dark:bg-slate-800 border-2 border-sky-200 dark:border-slate-700 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition duration-500 cursor-pointer rounded-2xl">
+                                <i class="fa-solid fa-puzzle-piece text-5xl text-sky-500 mb-4 drop-shadow-sm"></i>
+                                <p class="font-black text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300">Genius Cell<br>Architect</p>
+                            </div>
+                            <div class="box-card p-6 text-center bg-emerald-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-500 transition duration-500 cursor-pointer rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transform scale-105">
+                                <i class="fa-solid fa-star text-5xl text-emerald-500 mb-4 drop-shadow-md"></i>
+                                <p class="font-black text-xs uppercase tracking-widest text-slate-900 dark:text-white">Perfect<br>Score 100</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: PROGRESS -->
+                <section id="tab-progress" class="main-tab hidden space-y-6 animate-fade-in">
+                    <div class="border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-3xl font-black uppercase tracking-tight">My Progress</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Laporan Pencapaian Belajar</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="box-card p-6 bg-gradient-to-br from-brand-600 to-accent-500 text-white border-none flex flex-col justify-center items-center text-center">
+                            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-4xl mb-4 border-4 border-white/40 shadow-lg"><i class="fa-solid fa-trophy"></i></div>
+                            <h3 class="font-black text-2xl uppercase">Level <span id="prog-level">1</span></h3>
+                            <p class="text-brand-100 font-bold text-sm mt-1 mb-4" id="prog-rank">Junior Scientist</p>
+                            <div class="w-full max-w-xs bg-black/20 h-3 rounded-full overflow-hidden">
+                                <div id="prog-xp-bar" class="bg-white h-full w-0 transition-all duration-1000"></div>
+                            </div>
+                            <p class="text-xs font-bold mt-2"><span id="prog-xp">0</span> XP Terkumpul</p>
+                        </div>
+                        <div class="box-card p-6">
+                            <h3 class="font-black uppercase text-sm border-b pb-2 mb-4 text-slate-700">Aktivitas Selesai</h3>
+                            <ul class="space-y-3 text-sm font-bold text-slate-600" id="prog-activity-list">
+                                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i> Mendaftar di Laboratorium</li>
+                                <!-- JS akan menambahkan aktivitas lain -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+        
+        <!-- AI FLOATING ASSISTANT -->
+        <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+            <div id="ai-chat-window" class="hidden w-72 h-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 mb-4 flex-col overflow-hidden transition-all origin-bottom-right">
+                <div class="bg-brand-600 text-white p-3 font-black text-xs uppercase flex justify-between items-center shadow-md">
+                    <span><i class="fa-solid fa-robot mr-2"></i> Lab Assistant</span>
+                    <button onclick="toggleAI()" class="hover:text-brand-200"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 dark:bg-slate-950 text-xs" id="ai-messages">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl rounded-tl-none border border-slate-200 dark:border-slate-700 shadow-sm max-w-[90%] text-slate-600 dark:text-slate-300 font-bold">
+                        Halo! Saya Asisten AI. Tanya saya jika bingung saat praktikum!
+                    </div>
+                </div>
+                <div class="p-2 bg-white dark:bg-slate-900 border-t border-slate-200 flex gap-2">
+                    <input type="text" id="ai-input" placeholder="Tanya tentang sel..." class="flex-grow p-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 rounded-lg outline-none">
+                    <button onclick="sendAIMsg()" class="w-8 h-8 bg-brand-600 text-white rounded-lg flex items-center justify-center hover:bg-brand-500"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+            <button onclick="toggleAI()" class="w-14 h-14 bg-brand-600 text-white rounded-full shadow-[0_0_15px_rgba(79,70,229,0.5)] flex items-center justify-center text-2xl hover:scale-110 transition-transform relative">
+                <i class="fa-solid fa-robot"></i>
+                <span class="absolute -top-1 -right-1 flex h-4 w-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-rose-500 border-2 border-white"></span></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="custom-toast" class="fixed top-5 right-5 z-[150] transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-6 py-4 flex items-center space-x-4 border-l-8 border-brand-500 shadow-xl rounded-r-xl">
+            <i id="toast-icon" class="fa-solid fa-info-circle text-2xl"></i>
+            <div><h4 id="toast-title" class="text-sm font-black uppercase tracking-wider">Info</h4><p id="toast-msg" class="text-xs font-bold text-slate-300 mt-1">Pesan.</p></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CORE STATE ---
+        window.appState = {
+            role: null, // 'student' | 'teacher'
+            currentUser: { name: "", kelas: "", absen: "", xp: 0, level: 1, quizScore: "-", lkpdStatus: "Belum" },
+            usersData: [], // Array of all students for teacher dash
+            lkpdQuestions: [
+                { id: 1, text: "Berdasarkan pengamatan di Virtual Lab, jelaskan perbedaan bentuk sel tumbuhan dan epitel pipi!" },
+                { id: 2, text: "Apa yang terjadi pada sel tumbuhan (vakuola) jika berada di lingkungan yang sangat kering?" }
+            ]
+        };
+
+        // Simulated Database Setup via LocalStorage
+        const loadDatabase = () => {
+            try {
+                const storedUsers = localStorage.getItem('cell_users');
+                if (storedUsers) window.appState.usersData = JSON.parse(storedUsers);
+                
+                const storedLKPD = localStorage.getItem('cell_lkpd_questions');
+                if (storedLKPD) window.appState.lkpdQuestions = JSON.parse(storedLKPD);
+            } catch (e) { console.warn("LocalStorage tidak tersedia."); }
+        };
+
+        const saveDatabase = () => {
+            try {
+                localStorage.setItem('cell_users', JSON.stringify(window.appState.usersData));
+                localStorage.setItem('cell_lkpd_questions', JSON.stringify(window.appState.lkpdQuestions));
+            } catch (e) {}
+        };
+
+        window.onload = () => {
+            loadDatabase();
+            
+            // Allow Enter key in AI chat
+            const aiInput = document.getElementById('ai-input');
+            if (aiInput) aiInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAIMsg(); });
+            
+            setSlide('plant'); // Init microscope
+        };
+
+        // --- UI & UTILS ---
+        window.tTmr = null;
+        window.showToast = (title, msg, type="info") => {
+            const toast = document.getElementById('custom-toast');
+            if (!toast) return;
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-msg').textContent = msg;
+            const icon = document.getElementById('toast-icon');
+            toast.firstElementChild.className = "text-white px-6 py-4 flex items-center space-x-4 border-l-8 shadow-xl bg-slate-800 rounded-r-xl " + (type==="success"?"border-emerald-500":type==="error"?"border-rose-500":"border-brand-500");
+            icon.className = "fa-solid text-2xl " + (type==="success"?"fa-check-circle text-emerald-400":type==="error"?"fa-xmark-circle text-rose-400":"fa-info-circle text-brand-400");
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            clearTimeout(window.tTmr); 
+            window.tTmr = setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 3000);
+        };
+
+        // --- AUTHENTICATION ---
+        window.switchLoginTab = (role) => {
+            document.getElementById('tab-login-student').className = `flex-1 py-2 text-sm font-black uppercase border-b-2 ${role==='student'?'text-brand-600 border-brand-600':'text-slate-400 border-transparent hover:text-slate-600'}`;
+            document.getElementById('tab-login-teacher').className = `flex-1 py-2 text-sm font-black uppercase border-b-2 ${role==='teacher'?'text-accent-600 border-accent-600':'text-slate-400 border-transparent hover:text-slate-600'}`;
+            document.getElementById('form-student').classList.toggle('hidden', role !== 'student');
+            document.getElementById('form-teacher').classList.toggle('hidden', role !== 'teacher');
+        };
+
+        window.startApp = (role) => {
+            if (role === 'teacher') {
+                const pin = document.getElementById('welcome-pin').value;
+                if (pin !== 'guru123') return showToast("Gagal", "PIN Akses Guru Salah!", "error");
+                
+                window.appState.role = 'teacher';
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('teacher-wrapper').classList.remove('hidden');
+                renderTeacherDash();
+                showToast("Berhasil", "Selamat datang di Panel Guru", "success");
+            } else {
+                const name = document.getElementById('welcome-name').value.trim();
+                const kelas = document.getElementById('welcome-kelas').value;
+                const absen = document.getElementById('welcome-absen').value;
+                const pin = document.getElementById('welcome-student-pin').value;
+                
+                if (!name || !kelas || !absen || !pin) return showToast("Data Tidak Lengkap", "Harap isi Nama, Kelas, Absen, dan PIN.", "error");
+                if (pin !== 'siswa123') return showToast("Gagal", "PIN Siswa Salah! Gunakan: siswa123", "error");
+                
+                window.appState.role = 'student';
+                
+                // Cek apakah user sudah ada di database lokal
+                const userKey = `${name}-${kelas}-${absen}`.toLowerCase();
+                let existingUser = window.appState.usersData.find(u => `${u.name}-${u.kelas}-${u.absen}`.toLowerCase() === userKey);
+                
+                if (existingUser) {
+                    window.appState.currentUser = existingUser;
+                } else {
+                    // Buat user baru
+                    window.appState.currentUser = { name, kelas, absen, xp: 0, level: 1, quizScore: "-", lkpdStatus: "Belum", id: userKey };
+                    window.appState.usersData.push(window.appState.currentUser);
+                    saveDatabase();
+                }
+
+                // Update UI Siswa
+                document.getElementById('home-name').textContent = name.split(" ")[0];
+                document.getElementById('sb-name').textContent = name;
+                document.getElementById('sb-kelas').textContent = "Kelas " + kelas;
+                document.getElementById('sb-absen').textContent = absen;
+                
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-wrapper').classList.remove('hidden');
+                
+                updateLevelUI();
+                renderStudentLKPD();
+                switchMainTab('home');
+                showToast("Login Berhasil", `Selamat datang kembali, ${name}!`, "success");
+            }
+        };
+
+        window.logout = () => {
+            window.location.reload(); // Simple reload clears temporary state and returns to login
+        };
+
+        // --- TEACHER LOGIC ---
+        window.switchTeacherTab = (tabId) => {
+            document.getElementById('t-content-students').classList.add('hidden');
+            document.getElementById('t-content-lkpd').classList.add('hidden');
+            
+            document.getElementById('t-tab-students').className = "w-full text-left p-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100 transition";
+            document.getElementById('t-tab-lkpd').className = "w-full text-left p-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100 transition";
+            
+            document.getElementById(`t-content-${tabId}`).classList.remove('hidden');
+            if(tabId === 'students') document.getElementById('t-tab-students').className = "w-full text-left p-3 rounded-xl font-bold text-sm bg-accent-50 text-accent-700 transition";
+            if(tabId === 'lkpd') document.getElementById('t-tab-lkpd').className = "w-full text-left p-3 rounded-xl font-bold text-sm bg-accent-50 text-accent-700 transition";
+        };
+
+        window.renderTeacherDash = () => {
+            // Stats
+            document.getElementById('stat-total-students').textContent = window.appState.usersData.length;
+            const validScores = window.appState.usersData.map(u => parseFloat(u.quizScore)).filter(s => !isNaN(s));
+            const avg = validScores.length ? (validScores.reduce((a,b)=>a+b,0)/validScores.length).toFixed(1) : 0;
+            document.getElementById('stat-avg-quiz').textContent = avg;
+
+            // Table
+            const tbody = document.getElementById('teacher-students-list');
+            tbody.innerHTML = "";
+            if (window.appState.usersData.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-slate-400 italic font-bold'>Belum ada siswa yang mendaftar.</td></tr>";
+            } else {
+                window.appState.usersData.forEach(u => {
+                    const lkpdColor = u.lkpdStatus === 'Selesai' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100';
+                    const tr = `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                        <td class="p-3 font-bold">${u.name}</td>
+                        <td class="p-3">${u.kelas}</td>
+                        <td class="p-3"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-black mr-1">L${u.level}</span> ${u.xp} XP</td>
+                        <td class="p-3 font-black ${u.quizScore>70?'text-emerald-500':'text-brand-500'}">${u.quizScore}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-black uppercase ${lkpdColor}">${u.lkpdStatus}</span></td>
+                    </tr>`;
+                    tbody.innerHTML += tr;
+                });
+            }
+
+            // LKPD List
+            const lkpdContainer = document.getElementById('teacher-lkpd-list');
+            lkpdContainer.innerHTML = "";
+            window.appState.lkpdQuestions.forEach((q, idx) => {
+                lkpdContainer.innerHTML += `
+                    <div class="flex justify-between items-start bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div><span class="text-xs font-black text-accent-500 uppercase mr-2">Soal ${idx+1}</span><p class="text-sm font-bold mt-1 text-slate-700 dark:text-slate-300">${q.text}</p></div>
+                        <button onclick="deleteLKPDQuestion(${q.id})" class="text-rose-400 hover:text-rose-600 transition p-2"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>`;
+            });
+        };
+
+        window.addLKPDQuestion = () => {
+            const inp = document.getElementById('new-lkpd-q');
+            const text = inp.value.trim();
+            if (!text) return showToast("Gagal", "Teks soal tidak boleh kosong", "error");
+            
+            const newId = Date.now();
+            window.appState.lkpdQuestions.push({ id: newId, text: text });
+            saveDatabase();
+            inp.value = "";
+            renderTeacherDash();
+            showToast("Berhasil", "Soal LKPD ditambahkan.", "success");
+        };
+
+        window.deleteLKPDQuestion = (id) => {
+            window.appState.lkpdQuestions = window.appState.lkpdQuestions.filter(q => q.id !== id);
+            saveDatabase();
+            renderTeacherDash();
+            showToast("Terhapus", "Soal dihapus dari daftar.", "info");
+        };
+
+        window.downloadCSV = () => {
+            if (window.appState.usersData.length === 0) return showToast("Kosong", "Tidak ada data siswa untuk diunduh.", "error");
+            
+            let csvContent = "data:text/csv;charset=utf-8,Nama,Kelas,Absen,Level,XP,Nilai Kuis,Status LKPD\n";
+            window.appState.usersData.forEach(u => {
+                csvContent += `"${u.name}","${u.kelas}","${u.absen}",${u.level},${u.xp},${u.quizScore},"${u.lkpdStatus}"\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Rekap_Nilai_Lab_Sel.csv");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        };
+
+        // --- STUDENT UI & LOGIC ---
+        window.switchMainTab = (targetId) => {
+            document.querySelectorAll('.main-tab').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-${targetId}`);
+            if(target) target.classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const nav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if(nav) nav.classList.add('active');
+            
+            if(window.innerWidth < 1024) toggleMobileMenu();
+            const scrollContainer = document.getElementById('main-content-scroll');
+            if (scrollContainer) scrollContainer.scrollTo({top:0, behavior:'smooth'});
+        };
+
+        window.toggleMobileMenu = () => {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('open');
+        };
+
+        const updateCurrentUser = () => {
+            // Update the object inside the array
+            const idx = window.appState.usersData.findIndex(u => u.id === window.appState.currentUser.id);
+            if(idx > -1) window.appState.usersData[idx] = window.appState.currentUser;
+            saveDatabase();
+        };
+
+        window.addXP = (amount, msg) => {
+            if (window.appState.role !== 'student') return;
+            
+            window.appState.currentUser.xp += amount;
+            let threshold = window.appState.currentUser.level * 100;
+            
+            if(window.appState.currentUser.xp >= threshold) {
+                window.appState.currentUser.xp -= threshold;
+                window.appState.currentUser.level++;
+                showToast("LEVEL UP! 🌟", `Kamu mencapai Level ${window.appState.currentUser.level}!`, "success");
+            } else {
+                showToast("XP Naik", `+${amount} XP: ${msg}`, "success");
+            }
+            
+            // Add to activity list
+            const list = document.getElementById('prog-activity-list');
+            if (list) {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fa-solid fa-bolt text-amber-500 mr-2"></i> Mendapat ${amount} XP: ${msg}`;
+                list.prepend(li); // add to top
+            }
+
+            updateCurrentUser();
+            updateLevelUI();
+        };
+
+        window.updateLevelUI = () => {
+            const u = window.appState.currentUser;
+            document.getElementById('sb-level').textContent = u.level;
+            document.getElementById('sb-xp').textContent = u.xp;
+            
+            let threshold = u.level * 100;
+            document.getElementById('sb-next-xp').textContent = threshold;
+            
+            let rank = "Student";
+            if(u.level >= 2) rank = "Junior Scientist";
+            if(u.level >= 4) rank = "Cell Researcher";
+            if(u.level >= 6) rank = "Master Biologist";
+            
+            const rankEls = document.querySelectorAll('#prog-rank');
+            rankEls.forEach(el => el.textContent = rank);
+            
+            document.getElementById('prog-level').textContent = u.level;
+            document.getElementById('prog-xp').textContent = u.xp;
+            
+            let percent = (u.xp / threshold) * 100;
+            document.getElementById('sb-xp-bar').style.width = Math.min(percent, 100) + "%";
+            const progXpBar = document.getElementById('prog-xp-bar');
+            if (progXpBar) progXpBar.style.width = Math.min(percent, 100) + "%";
+        };
+
+        // --- EXPLORE TAB LOGIC ---
+        window.showInfo = (name, desc, icon, colorClass) => {
+            document.getElementById('explore-placeholder').classList.add('hidden');
+            const info = document.getElementById('explore-info');
+            info.classList.remove('hidden');
+            info.classList.add('animate-fade-in');
+            
+            document.getElementById('exp-title').textContent = name;
+            document.getElementById('exp-desc').textContent = desc;
+            
+            const iEl = document.getElementById('exp-icon');
+            iEl.className = `fa-solid ${icon} text-4xl mb-4 ${colorClass}`;
+        };
+
+        // --- MICROSCOPE SIMULATION LOGIC ---
+        window.microscopeState = { slide: null, lens: 4, targetCoarse: 0, targetFine: 0, awarded: false };
+        const slideImg = {
+            'plant': 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'200\' height=\'200\' fill=\'%23dcfce7\'/><g stroke=\'%23166534\' fill=\'none\' stroke-width=\'2\'><rect x=\'20\' y=\'20\' width=\'60\' height=\'100\'/><circle cx=\'50\' cy=\'70\' r=\'10\' fill=\'%234ade80\'/><rect x=\'80\' y=\'10\' width=\'80\' height=\'90\'/><circle cx=\'120\' cy=\'50\' r=\'10\' fill=\'%234ade80\'/></g></svg>")',
+            'animal': 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'200\' height=\'200\' fill=\'%23ffe4e6\'/><g stroke=\'%239f1239\' fill=\'none\' stroke-width=\'2\'><path d=\'M50 50 Q 80 40 100 70 T 80 120 Q 40 110 40 80 Z\'/><circle cx=\'70\' cy=\'80\' r=\'8\' fill=\'%23f43f5e\'/></g></svg>")'
+        };
+
+        window.setSlide = (type) => {
+            window.microscopeState.slide = type;
+            window.microscopeState.awarded = false;
+            window.microscopeState.targetCoarse = Math.floor(Math.random() * 40) - 20; 
+            window.microscopeState.targetFine = Math.floor(Math.random() * 8) - 4;
+
+            document.getElementById('slider-coarse').value = -50;
+            document.getElementById('slider-fine').value = 0;
+            
+            document.getElementById('btn-slide-plant').classList.remove('bg-emerald-100', 'border-emerald-500');
+            document.getElementById('btn-slide-animal').classList.remove('bg-rose-100', 'border-rose-500');
+            
+            if(type === 'plant') document.getElementById('btn-slide-plant').classList.add('bg-emerald-100', 'border-emerald-500');
+            else document.getElementById('btn-slide-animal').classList.add('bg-rose-100', 'border-rose-500');
+            
+            document.getElementById('microscope-view').style.backgroundImage = slideImg[type];
+            updateMicroscope();
+        };
+
+        window.setLens = (mag) => {
+            document.getElementById('btn-lens-4').className = "flex-1 py-2 rounded-lg font-black text-sm border-2 border-transparent text-slate-500 hover:bg-slate-100";
+            document.getElementById('btn-lens-10').className = "flex-1 py-2 rounded-lg font-black text-sm border-2 border-transparent text-slate-500 hover:bg-slate-100";
+            
+            const btn = document.getElementById(`btn-lens-${mag}`);
+            if(btn) btn.className = `flex-1 py-2 rounded-lg font-black text-sm bg-white shadow-sm border-b-4 ${mag==4?'border-brand-500':'border-amber-500'} text-slate-700`;
+            
+            document.getElementById('total-mag').textContent = (mag * 10) + "x";
+            document.getElementById('microscope-view').style.transform = `scale(${mag === 4 ? 1 : 2.5})`;
+            
+            window.microscopeState.targetFine = Math.floor(Math.random() * 10) - 5;
+            updateMicroscope();
+        };
+
+        window.updateMicroscope = () => {
+            const c = parseInt(document.getElementById('slider-coarse').value);
+            const f = parseInt(document.getElementById('slider-fine').value);
+            const l = parseInt(document.getElementById('slider-light').value);
+            
+            document.getElementById('val-coarse').textContent = c;
+            document.getElementById('val-fine').textContent = f;
+            document.getElementById('val-light').textContent = l + "%";
+
+            let blur = Math.abs(c - window.microscopeState.targetCoarse) * 0.5;
+            if (blur < 10) blur += Math.abs(f - window.microscopeState.targetFine) * 0.5;
+            else blur += 5;
+            blur = Math.max(0, Math.min(20, blur));
+
+            document.getElementById('microscope-view').style.filter = `blur(${blur}px) brightness(${l}%)`;
+            const stat = document.getElementById('focus-status');
+            
+            if (blur < 1 && l > 30 && l < 120) {
+                stat.textContent = "Fokus Jelas!"; stat.className = "text-emerald-400";
+                if (!window.microscopeState.awarded) { addXP(15, "Menemukan Fokus Mikroskop"); window.microscopeState.awarded = true; }
+            } else if (blur < 5) {
+                stat.textContent = "Hampir Fokus"; stat.className = "text-amber-400";
+            } else { stat.textContent = "Buram"; stat.className = "text-rose-400"; }
+        };
+
+        // --- INVESTIGATION (CELL HOSPITAL) LOGIC ---
+        window.cases = [
+            { s: "Sel tidak memproduksi ATP. Aktivitas terhenti.", a: "Mitokondria" },
+            { s: "Zat sisa beracun menumpuk tidak tercerna.", a: "Lisosom" },
+            { s: "Sel gagal membuat protein baru.", a: "Ribosom" }
+        ];
+        window.currCase = 0;
+        
+        window.nextInvestigation = () => {
+            window.currCase = (window.currCase + 1) % window.cases.length;
+            document.getElementById('inv-symptom').textContent = `"${window.cases[window.currCase].s}"`;
+            document.getElementById('inv-result').classList.add('hidden');
+        };
+        
+        window.checkDiagnosis = (ans) => {
+            const res = document.getElementById('inv-result');
+            res.classList.remove('hidden');
+            if(ans === window.cases[window.currCase].a) {
+                res.className = "mt-4 p-3 rounded-xl text-center font-black uppercase text-xs border-2 border-emerald-500 bg-emerald-100 text-emerald-700 animate-pulse";
+                res.innerHTML = "<i class='fa-solid fa-check mr-2'></i> Diagnosis Tepat! Pasien selamat.";
+                addXP(10, "Diagnosis RS Sel Benar");
+            } else {
+                res.className = "mt-4 p-3 rounded-xl text-center font-black uppercase text-xs border-2 border-rose-500 bg-rose-100 text-rose-700";
+                res.innerHTML = "<i class='fa-solid fa-xmark mr-2'></i> Salah! Coba organel lain.";
+            }
+        };
+
+        // --- THINK (WHAT IF) LOGIC ---
+        window.runWhatIf = (type) => {
+            const vis = document.getElementById('wi-cell-visual');
+            const vac = document.getElementById('wi-vacuole');
+            const rep = document.getElementById('wi-report');
+            
+            // Reset
+            vis.className = "w-40 h-40 bg-emerald-100 rounded-lg border-4 border-emerald-500 flex items-center justify-center transition-all duration-1000 relative overflow-hidden flex-shrink-0";
+            vac.className = "w-20 h-20 bg-blue-200 rounded-full border border-blue-400 transition-all duration-1000 absolute";
+            document.getElementById('wi-chloro').className = "w-6 h-6 bg-emerald-500 rounded-full absolute top-2 left-2 transition-opacity duration-1000";
+
+            setTimeout(() => {
+                if(type === 'kering') {
+                    vis.classList.replace('bg-emerald-100', 'bg-emerald-50'); vis.classList.add('scale-90');
+                    vac.classList.replace('w-20', 'w-6'); vac.classList.replace('h-20', 'h-6');
+                    rep.innerHTML = "<strong>Plasmolisis:</strong> Kekurangan air membuat vakuola menyusut drastis. Membran terlepas dari dinding sel. Tumbuhan layu.";
+                    addXP(5, "Simulasi Turgor");
+                } else {
+                    document.getElementById('wi-chloro').classList.add('opacity-20');
+                    rep.innerHTML = "<strong>Etiolasi:</strong> Tanpa cahaya, kloroplas gagal berfotosintesis. Klorofil rusak sehingga daun pucat.";
+                    addXP(5, "Simulasi Kloroplas");
+                }
+            }, 100);
+        };
+
+        // --- GAME (BUILD CELL) LOGIC ---
+        window.draggedType = null;
+        window.drag = (ev) => { window.draggedType = ev.target.getAttribute('data-type'); ev.dataTransfer.setData("text", ev.target.id); };
+        window.allowDrop = (ev) => { ev.preventDefault(); const t = ev.target.closest('.drop-zone'); if(t) t.classList.add('active'); };
+        window.drop = (ev) => {
+            ev.preventDefault();
+            document.querySelectorAll('.drop-zone').forEach(el => el.classList.remove('active'));
+            const zone = ev.target.closest('.drop-zone');
+            
+            if (zone && zone.getAttribute('data-target') === window.draggedType) {
+                const el = document.getElementById(ev.dataTransfer.getData("text"));
+                if (el) {
+                    el.className = "text-3xl transform hover:scale-110 transition pointer-events-none";
+                    el.innerHTML = el.querySelector('i').outerHTML;
+                    zone.appendChild(el);
+                    zone.classList.replace('border-dashed', 'border-solid');
+                    zone.classList.replace('border-cbd5e1', 'border-emerald-500');
+                    zone.removeAttribute('ondrop'); zone.removeAttribute('ondragover');
+                    addXP(20, "Merakit Sel");
+                }
+            } else {
+                showToast("Salah Posisi", "Coba tempatkan di area yang sesuai.", "error");
+            }
+        };
+
+        // --- STUDENT JOURNAL & ASSESSMENT LOGIC ---
+        window.renderStudentLKPD = () => {
+            const container = document.getElementById('student-lkpd-container');
+            container.innerHTML = "";
+            window.appState.lkpdQuestions.forEach((q, idx) => {
+                container.innerHTML += `
+                    <div class="mb-4">
+                        <label class="block text-sm font-black text-slate-700 mb-2">${idx+1}. ${q.text}</label>
+                        <textarea class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:border-brand-500 outline-none h-20" placeholder="Ketik jawabanmu di sini..."></textarea>
+                    </div>
+                `;
+            });
+        };
+
+        window.submitJournal = () => {
+            window.appState.currentUser.lkpdStatus = "Selesai";
+            updateCurrentUser();
+            addXP(30, "Mengerjakan Jurnal LKPD");
+            showToast("Berhasil", "Jurnal LKPD berhasil disimpan dan dikirim ke Guru.", "success");
+        };
+
+        window.submitQuiz = () => {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            
+            if(!q1 || !q2) return showToast("Peringatan", "Jawab seluruh soal kuis sebelum mengumpulkan.", "error");
+            
+            let score = 0;
+            if(q1.value === "B") score += 50;
+            if(q2.value === "B") score += 50;
+            
+            window.appState.currentUser.quizScore = score;
+            updateCurrentUser();
+            
+            const display = document.getElementById('quiz-score-display');
+            document.getElementById('q-score').textContent = score;
+            display.classList.remove('hidden');
+            
+            addXP(score, "Menyelesaikan Kuis Dasar");
+            showToast("Kuis Selesai", `Kamu mendapat nilai ${score}!`, "success");
+        };
+
+        // --- SISTEM NAVIGASI SUB-TAB ---
+        window.activateSubTab = (parent, tabId) => {
+            // Sembunyikan semua konten sub-tab dari parent ini
+            document.querySelectorAll(`.sub-${parent}`).forEach(el => el.classList.add('hidden'));
+            
+            // Reset gaya semua tombol sub-tab
+            document.querySelectorAll(`.btn-sub-${parent}`).forEach(el => {
+                el.classList.remove('bg-brand-500', 'text-white', 'shadow-md');
+                el.classList.add('bg-slate-200', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+            });
+            
+            // Tampilkan konten target & ubah gaya tombol
+            const targetEl = document.getElementById(`sub-${parent}-${tabId}`);
+            const btnEl = document.getElementById(`btn-sub-${parent}-${tabId}`);
+            if(targetEl) targetEl.classList.remove('hidden');
+            if(btnEl) {
+                btnEl.classList.add('bg-brand-500', 'text-white', 'shadow-md');
+                btnEl.classList.remove('bg-slate-200', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+            }
+        };
+
+        // --- SISTEM GENERATOR LAPORAN PRAKTIKUM OTOMATIS ---
+        window.generateLabReport = () => {
+            if (window.appState.role !== 'student') return showToast("Akses Ditolak", "Hanya mode Siswa yang dapat mencetak Laporan Praktikum.", "error");
+            
+            // Kalkulasi skor akurasi (mockup cerdas: antara 85% hingga 99%)
+            const accScore = Math.floor(Math.random() * 15) + 85; 
+            
+            // Injeksi data siswa ke DOM Laporan
+            document.getElementById('lr-name').textContent = window.appState.currentUser.name || '-';
+            document.getElementById('lr-kelas').textContent = window.appState.currentUser.kelas || '-';
+            document.getElementById('lr-absen').textContent = window.appState.currentUser.absen || '-';
+            document.getElementById('lr-acc').textContent = accScore + "%";
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('lr-date').textContent = new Date().toLocaleDateString('id-ID', options);
+            
+            // Tampilkan Modal
+            document.getElementById('lab-report-modal').classList.remove('hidden');
+        };
+        
+        window.closeLabReport = () => document.getElementById('lab-report-modal').classList.add('hidden');
+        window.printLabReport = () => window.print();
+
+        // --- SISTEM KUIS 15 SOAL (DINAMIS & OTOMATIS) ---
+        const quiz15Data = [
+            { q: "Organel selular yang memegang peranan krusial sebagai tempat terjadinya respirasi seluler penghasil energi (ATP) adalah...", o: ["Ribosom", "Mitokondria", "Nukleus", "Lisosom"], a: 1 },
+            { q: "Perbedaan fundamental yang paling mencolok antara anatomi sel tumbuhan dan sel hewan adalah, sel tumbuhan secara eksklusif memiliki...", o: ["Membran Sel & Inti", "Dinding Sel & Kloroplas", "Mitokondria & Vakuola", "Sitoplasma & Ribosom"], a: 1 },
+            { q: "Struktur berbentuk bulat yang bertindak sebagai pusat komando seluruh aktivitas seluler serta brankas penyimpan materi genetik (DNA) disebut...", o: ["Badan Golgi", "Vakuola", "Nukleus", "Sentriol"], a: 2 },
+            { q: "Dalam pabrik seluler, organel kecil yang bertugas secara spesifik merakit asam amino menjadi rantai protein adalah...", o: ["Lisosom", "Ribosom", "Kloroplas", "Membran Plasma"], a: 1 },
+            { q: "Organel yang diibaratkan sebagai 'tempat pembuangan akhir' karena mengandung enzim hidrolitik untuk mendaur ulang organel rusak adalah...", o: ["Lisosom", "Vakuola Sentral", "Nukleolus", "Retikulum Endoplasma"], a: 0 },
+            { q: "Proses biokimia fotosintesis yang mengubah energi foton menjadi energi kimia (glukosa) pada tumbuhan, berlangsung di dalam...", o: ["Mitokondria", "Ribosom Kasar", "Kloroplas", "Dinding Selulosa"], a: 2 },
+            { q: "Sistem membran berbentuk labirin kompleks yang berfungsi sebagai jalur transportasi antar seluler disebut...", o: ["Retikulum Endoplasma", "Apparatus Golgi", "Sitoskeleton", "Kapsul"], a: 0 },
+            { q: "Penghalang dinamis yang bersifat semipermeabel selektif, bertugas memfilter lalu lintas zat yang masuk dan keluar sel adalah...", o: ["Dinding Sel", "Membran Sel", "Dinding Peptidoglikan", "Membran Inti"], a: 1 },
+            { q: "Zat cair berwujud gel (koloid) di dalam sel tempat berlangsungnya reaksi metabolisme dan mengapungnya organel disebut...", o: ["Plasma Darah", "Sitoplasma", "Klorofil", "Getah Bening"], a: 1 },
+            { q: "Organel penyimpan cadangan air, nutrisi, dan pigmen, yang ukurannya mendominasi lebih dari 80% volume sel tumbuhan dewasa adalah...", o: ["Mitokondria", "Lisosom Primer", "Vakuola Sentral", "Ribosom Bebas"], a: 2 },
+            { q: "Struktur silinder mikro yang hanya ditemukan pada biologi sel hewan dan memegang kendali utama saat proses pembelahan sel dinamakan...", o: ["Sentriol", "Plastida", "Dinding Sel Primer", "Plasmodesmata"], a: 0 },
+            { q: "Pabrik penyortiran, modifikasi, dan pengemasan akhir protein ke dalam vesikula sebelum diekspor ke luar sel dilakukan oleh...", o: ["Retikulum Halus", "Nukleus", "Badan Golgi", "Polisom"], a: 2 },
+            { q: "Pigmen hijau fotosintetik esensial yang bertugas menangkap spektrum cahaya matahari dan melepaskan elektron bebas disebut...", o: ["Karotenoid", "Klorofil", "Melanin", "Hemoglobin"], a: 1 },
+            { q: "Entitas biologis uniseluler prokariotik primitif yang tidak memiliki membran pembungkus inti sel (nukleus sejati) adalah...", o: ["Amoeba Proteus", "Jamur Roti", "Bakteri E. coli", "Sel Epidermis"], a: 2 },
+            { q: "Karakteristik spesifik membran plasma yang hanya mengizinkan molekul atau ion tertentu saja untuk melintas disebut dengan sifat...", o: ["Impermeabel Absolut", "Permeabel Bebas", "Semipermeabel Selektif", "Osmosis Terbalik"], a: 2 }
+        ];
+
+        window.renderDynamicQuiz = () => {
+            const container = document.getElementById('quiz-dynamic-container');
+            if(!container) return;
+            container.innerHTML = ""; // Bersihkan kontainer
+            
+            quiz15Data.forEach((item, idx) => {
+                let optionsHtml = item.o.map((opt, oIdx) => `
+                    <label class="flex items-center space-x-3 cursor-pointer p-4 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-900/20 border-2 border-slate-100 dark:border-slate-700 hover:border-brand-300 transition group">
+                        <input type="radio" name="dynQuiz${idx}" value="${oIdx}" class="w-5 h-5 accent-brand-500"> 
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-700 transition">${opt}</span>
+                    </label>
+                `).join('');
+
+                container.innerHTML += `
+                    <div class="quiz-q bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                        <div class="absolute -left-3 top-6 bg-brand-500 text-white font-black text-xs w-8 h-8 rounded-full flex items-center justify-center shadow-md">${idx+1}</div>
+                        <p class="font-black text-[15px] leading-relaxed text-slate-800 dark:text-white mb-5 pl-4">${item.q}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.submitDynamicQuiz = () => {
+            let score = 0;
+            let answered = 0;
+            
+            // Hitung setiap jawaban
+            quiz15Data.forEach((item, idx) => {
+                const ans = document.querySelector(`input[name="dynQuiz${idx}"]:checked`);
+                if(ans) {
+                    answered++;
+                    if(parseInt(ans.value) === item.a) score += (100 / 15);
+                }
+            });
+
+            // Validasi kelengkapan
+            if(answered < 15) return showToast("Evaluasi Belum Lengkap", `Anda baru menjawab ${answered} dari 15 soal. Harap lengkapi semua sebelum Submit.`, "error");
+
+            score = Math.round(score);
+            
+            // Simpan ke State & Update UI Rapor
+            window.appState.currentUser.quizScore = score;
+            updateCurrentUser();
+            
+            const display = document.getElementById('quiz-score-display');
+            if(display) {
+                document.getElementById('q-score').textContent = score;
+                display.classList.remove('hidden');
+                
+                // Animasi visual nilai
+                display.classList.add('animate-bounce-slight');
+                setTimeout(() => display.classList.remove('animate-bounce-slight'), 2000);
+            }
+            
+            addXP(score * 2, "Evaluasi 15 Soal Komprehensif");
+            
+            if(score >= 80) showToast("Luar Biasa!", `Anda Lulus dengan Predikat Sangat Baik (Skor: ${score})`, "success");
+            else showToast("Kuis Selesai", `Nilai Anda: ${score}. Pelajari materi kembali di tab Explore.`, "info");
+        };
+
+        // Override Window Onload untuk me-render Quiz Dinamis secara otomatis
+        const _oldOnload = window.onload;
+        window.onload = () => {
+            if(_oldOnload) _oldOnload();
+            renderDynamicQuiz();
+        };
+
+        // --- AI ASSISTANT ---
+        window.toggleAI = () => { const w = document.getElementById('ai-chat-window'); if(w) w.classList.toggle('hidden'); };
+        window.sendAIMsg = () => {
+            const inp = document.getElementById('ai-input');
+            const msg = inp.value.trim();
+            if(!msg) return;
+            const box = document.getElementById('ai-messages');
+            
+            box.innerHTML += `<div class="bg-brand-100 text-brand-900 p-2 rounded-xl rounded-tr-none ml-auto max-w-[85%] border border-brand-200">${msg}</div>`;
+            inp.value = ""; box.scrollTop = box.scrollHeight;
+            
+            setTimeout(() => {
+                let ans = "Coba jelajahi Tab 'Explore' atau gunakan Mikroskop untuk mencari tahu jawabannya!";
+                if(msg.toLowerCase().includes('mitokondria')) ans = "Mitokondria berfungsi untuk respirasi sel, mengubah glukosa menjadi energi (ATP).";
+                if(msg.toLowerCase().includes('dinding')) ans = "Dinding sel hanya dimiliki tumbuhan. Ia membuat sel kaku dan terlindungi.";
+                
+                box.innerHTML += `<div class="bg-white dark:bg-slate-800 p-2 rounded-xl rounded-tl-none border border-slate-200 shadow-sm max-w-[90%] font-bold text-brand-700">${ans}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
+        };
+
+        // --- MINI GAMES INTERACTION ---
+        window.playPuzzle = (btn) => {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Menyusun...`;
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                showToast("Sempurna! 🧩", "Kamu berhasil menyusun struktur Anatomi Sel dengan cepat!", "success");
+                addXP(40, "Menyelesaikan Jigsaw Sel");
+            }, 3000);
+        };
+
+        window.playSkyQuiz = (btn) => {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-rocket fa-bounce mr-2"></i> Meluncur...`;
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                showToast("Berhasil Selamat! ☄️", "Kamu menjawab 5 pertanyaan meteor dengan benar!", "success");
+                addXP(50, "Memenangkan Sky Quiz");
+            }, 4000);
+        };
+    </script>
+</body>
+</html>
